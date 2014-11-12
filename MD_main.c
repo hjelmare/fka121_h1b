@@ -61,6 +61,8 @@ int main()
 	}
 	
 	potentialEnergy = get_energy_AL(pos, supercellLength, nParticles);
+	kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
+	energy = potentialEnergy + kineticEnergy;
 
 	printf("energy = %e \n", potentialEnergy);
 
@@ -69,8 +71,23 @@ int main()
 	// -gets forces (there's a function for that)
 	// -moves things (verlet? or something else? did i miss something?)
 	// -calculates pe, ke, and E, and saves them for matlab plotting
+
+	//Saving initial data:
+	FILE *kineticEnergyFile;
+	kineticEnergyFile = fopen("kineticEnergy.data","w");
+	fprintf(kineticEnergyFile, "%e \t %e \n", 0.0, kineticEnergy );
+
+	FILE *potentialEnergyFile;
+	potentialEnergyFile = fopen("potentialEnergy.data","w");
+	fprintf(potentialEnergyFile, "%e \t %e \n", 0.0, potentialEnergy);
 	
-	for (i=0;i<nSteps;i++) {
+	FILE *totEnergyFile;
+	totEnergyFile = fopen("totEnergy.data","w");
+	fprintf(totEnergyFile, "%e \t %e \n", 0.0, energy);
+
+
+	
+	for (i=1;i<nSteps;i++) {
 		// Update velocities and positions
 		for (j=0; j<nParticles; j++) {
 			for (k = 0; k<dim; k++) {
@@ -93,6 +110,10 @@ int main()
 		printf("kin %e %lf \n", kineticEnergy, kineticEnergy);
 		energy = potentialEnergy + kineticEnergy;
 		printf("e %e, pe %e, ke %e, v11 %e \n", energy, potentialEnergy, kineticEnergy, vel[0][0]);
+
+		fprintf(kineticEnergyFile, "%e \t %e \n", i*timestep, kineticEnergy );
+		fprintf(potentialEnergyFile, "%e \t %e \n", i*timestep, potentialEnergy);
+		fprintf(totEnergyFile, "%e \t %e \n", i*timestep, energy);
 	}
     /*
      Descriptions of the different functions in the files initfcc.c and alpotential.c are listed below.

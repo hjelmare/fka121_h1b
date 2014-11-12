@@ -13,7 +13,7 @@ double GetKineticEnergy(double vel[][3], double mass, int nParticles)
 	for(i = 0; i<nParticles; i++) {
 		sum = 0;
 		for(j = 0; j<dim; j++) {
-			sum += vel[i][j]*vel[i][j];
+			sum +=vel[i][j]*vel[i][j];
 		}
 		energy += sqrt(sum)*mass/2;
 	}
