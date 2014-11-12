@@ -17,7 +17,7 @@ int main()
 {
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
-	double totalTime = 1000;
+	double totalTime = 10;
 	double timestep = 0.01;
 		
 	// physical parameters
@@ -37,6 +37,8 @@ int main()
 	double energy, potentialEnergy, kineticEnergy;
 	double square_root_of_alpha;
 	double alpha = 1;
+	double currentTemp;
+	double sqrtAlpha;
 
 	// derived quantities
 	int nSteps = (int) totalTime/timestep;
@@ -115,12 +117,12 @@ int main()
 		currentTemp = GetInstantTemperature(vel, nParticles, mass);
 
 		//Calculate alpha (the velocity scaling parameter)
-		alpha = GetAlpha(wantedTemp, currentTemp, timestep, timeConstant) // This function calculates alpha that rescales our velocity at each timestep.
-		square_root_of_alpha = sqrt(alpha);
+		alpha = GetAlpha(wantedTemp, currentTemp, timestep, timeConstant); // This function calculates alpha that rescales our velocity at each timestep.
+		sqrtAlpha = sqrt(alpha);
 		//Rescale the velocity
 		for (j=0; j<nParticles; j++) {
 			for (k=0; k<dim; k++) {
-				vel[j][k] = vel[j][k] * square_root_of_alpha;
+				vel[j][k] = vel[j][k] * sqrtAlpha;
 			}
 		}
 
