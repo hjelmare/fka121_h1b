@@ -36,15 +36,12 @@ double GetKineticEnergy(double vel[][3], double mass, int nParticles)
 	return energy;
 }
 
-<<<<<<< HEAD
 // Calculate alpha (the modifier to get the right temperature)
-double getAlpha(int wantedTemp, double currentTemp, int timestep, int timeConstant)
+double GetAlpha(double wantedTemp, double currentTemp, double timestep, double timeConstant)
 {
-double alpha;
-alpha = 1 + timestep/timeConstant * (wantedTemp-currentTemp)/currentTemp;
+	double alpha;
+	alpha = 1 + timestep/timeConstant * (wantedTemp-currentTemp)/currentTemp;
 
-return alpha;
+	return alpha;
 }
-=======
 
->>>>>>> c32276c03d90f94303285ccafe883bd6358de817
