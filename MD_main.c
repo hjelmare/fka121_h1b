@@ -10,14 +10,14 @@
 #include <time.h>
 #include "initfcc.h"
 #include "alpotential.h"
-
+#include "MD_functions.h"
 
 /* Main program */
 int main()
 {
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
-	double totalTime = 100;
+	double totalTime = 1;
 	double timestep = 0.1;
 		
 	// physical parameters
@@ -89,11 +89,11 @@ int main()
 		}
 
 		potentialEnergy = get_energy_AL(pos, supercellLength, nParticles);
-		kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
-		printf("kin %e %lf \n", kineticEnergy, kineticEnergy);
+		kineticEnergy = GetKineticEnergy(dim, nParticles, vel, mass);
 		energy = potentialEnergy + kineticEnergy;
 		printf("e %e, pe %e, ke %e, v11 %e \n", energy, potentialEnergy, kineticEnergy, vel[0][0]);
 	}
+
     /*
      Descriptions of the different functions in the files initfcc.c and alpotential.c are listed below.
      */
