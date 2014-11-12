@@ -15,19 +15,33 @@
 /* Main program */
 int main()
 {
-	int i,j,k;
+	// REMEMBER: \m/ METAL UNITS \m/
+	// simulation settings
+	double totalTime = 100;
+	double timeStep = 0.1;
+		
+	// physical parameters
+	int dim = 3;
 	int nCells = 4;
-	int nParticles = 4*pow(nCells,3);
-	double latticeParameter = 3;
-	double pos[nParticles][3];
+	int nParticles = 4*pow(nCells,dim);
+	double latticeParameter = 3;	// find appropriate value for Al
 	double maxDeviation = 0.05;
-	double vel[nParticles][3];
-	double energy;
-    
+
+	// storage of physical quantities
+	double pos[nParticles][dim];
+	double vel[nParticles][dim];
+	double force[nParticles][dim];
+	double energy, potentialEnergy, kineticEnergy;
+
+	// derived quantities
+	int nSteps = (int) totalTime/timeStep;
+	double supercellLength = nCells * latticeParameter;	// is this right?
+
+	// other stuff
+	int i,j,k;   
 
 	srand(time(NULL));
 	double random_value;
-     
 
 	init_fcc(pos, 4, latticeParameter);
 
@@ -45,7 +59,7 @@ int main()
 		}
 	}
 	
-	energy = get_energy_AL(pos, 4*latticeParameter, nParticles);
+	potentialEnergy = get_energy_AL(pos, supercellLength, nParticles);
 
 	printf("energy = %e \n", energy);
 
@@ -54,7 +68,15 @@ int main()
 	// -gets forces (there's a function for that)
 	// -moves things (verlet? or something else? did i miss something?)
 	// -calculates pe, ke, and E, and saves them for matlab plotting
-	//
+	
+	for (i=0;i<nSteps;i++) {
+		get_forces_AL(force, pos, supercellLength, nParticles);
+
+		// use the force to move things...?
+		potentialEnergy = get_energy_AL(pos, supercellLength, nParticles);
+		kineticEnergy = GetKineticEnergy(vel, nParticles);
+		energy = potentialEnergy + kineticEnergy;
+	}
     /*
      Descriptions of the different functions in the files initfcc.c and alpotential.c are listed below.
      */
