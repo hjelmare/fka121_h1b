@@ -22,7 +22,7 @@ double GetInstantTemperature(double vel [][3], int nParticles, double mass)
 
 	for (i=0;i<nParticles;i++) {
 		for (j=0;j<nParticles;j++) {
-			temperature += factor * pow(vel[i][j],2)/mass;
+			temperature += factor * pow(vel[i][j],2)*mass/2;
 		}
 	}	
 
@@ -58,9 +58,11 @@ double GetAlphaT(double wantedTemp, double currentTemp, double timestep, double 
 
 
 // Calculate alphaP (the modifier to get the right preassure)
-double GetAlphaP(double wantedPreassure, double currentPreassure, double timestep, timeConstant)
+double GetAlphaP(double wantedPreassure, double currentPreassure, double timestep, double timeConstant)
 {
-	double kappa = 2.21901454 // Å^3/eV (at 300K)
+	double kappa = 2.21901454; // Å^3/eV (at 300K)
+	double alpha;
+
 	alpha = 1 - kappa*timestep/timeConstant*(wantedPreassure - currentPreassure);
 	
 	return alpha;

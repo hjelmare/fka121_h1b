@@ -17,7 +17,7 @@ int main()
 {
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
-	double totalTime = 10;
+	double totalTime = 100;
 	double timestep = 0.01;
 		
 	// physical parameters
@@ -25,11 +25,14 @@ int main()
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
 	int wantedTemp = 500;   // The temperature that we want the system to stabilize around.
-	double wantedPreassure = 300;	// The preassure that we want the system to stabilize around.
-	int timeConstant = 2;  // used in determining alpha. It's the constant that determines how fast our temperature will move towards the prefered temperature
+	double wantedPressure = 6.32420934 * 0.0000001;	// The preassure that we want the system to stabilize around.
+	double timeConstantT = 0.01;  // used in determining alpha. It's the constant that determines how fast our temperature will move towards the prefered temperature
+	double timeConstantP = 0.01;
 	double mass = 0.00279636;  // 26.9815 u
 	double latticeParameter = 4.05;
 	double maxDeviation = 0.05;
+	double curtAlphaP;
+	double virial;
 
 	// storage of physical quantities
 	double pos[nParticles][dim];
@@ -40,9 +43,10 @@ int main()
 	double alphaT = 1;
 	double alphaP = 1;
 	double currentTemp;
-	double currentPreassure;
+	double currentPressure;
 	double sqrtAlphaT;
 	double sqrtAlphaP;
+	double volume;
 
 	// derived quantities
 	int nSteps = (int) totalTime/timestep;
@@ -119,19 +123,26 @@ int main()
 		energy = potentialEnergy + kineticEnergy;
 
 		currentTemp = GetInstantTemperature(vel, nParticles, mass);
+		volume = pow(nCells*latticeParameter, 3);
+		virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
+		currentPressure = GetPressure(currentTemp, volume, virial, nParticles);
 
 		//Calculate alpha (the velocity and position scaling parameters)
-		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstant); // This function calculates alpha that rescales our velocity at each timestep.
-		alphaP = GetAlphaP(wantedPreassure, currentPreassure, timestep, timeConstant);
+		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstantT); // This function calculates alpha that rescales our velocity at each timestep.
+		alphaP = GetAlphaP(wantedPressure, currentPressure, timestep, timeConstantP);
 		sqrtAlphaT = sqrt(alphaT);
 		curtAlphaP = pow(alphaP, 1.0 / 3);
 		//Rescale the velocity
 		for (j=0; j<nParticles; j++) {
 			for (k=0; k<dim; k++) {
 				vel[j][k] = vel[j][k] * sqrtAlphaT;
+				pos[j][k] = pos[j][k] * curtAlphaP;
+				latticeParameter = latticeParameter * curtAlphaP;
 			}
 		}
-
+//if(i % 100 == 0){
+//		printf("alphaT = %e \t alphaP= %e \t temp= %e \t pressure= %e \n", alphaT, alphaP, currentTemp, currentPressure);
+//}
 		fprintf(kineticEnergyFile, "%e \t %e \n", i*timestep, kineticEnergy );
 		fprintf(potentialEnergyFile, "%e \t %e \n", i*timestep, potentialEnergy);
 		fprintf(totEnergyFile, "%e \t %e \n", i*timestep, energy);
