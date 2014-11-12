@@ -2,13 +2,23 @@
 #include <math.h>
 #include <stdlib.h>
 
+#define BOLTZMANN 8.6173324*0.00001	// in eV/K
+
+double GetPressure(double temperature, double volume, double virial, int nParticles)
+{
+	double pressure = 0;
+
+	pressure = (nParticles * BOLTZMANN * temperature + virial)/volume;
+
+	return pressure;
+}
+
 double GetInstantTemperature(double vel [][3], int nParticles, double mass)
 {
-	double k = 1;		// boltzmann's constant (in metal units!!)
 	double temperature = 0;
 	int i,j;
 
-	double factor = 2/(3*nParticles*k);
+	double factor = 2/(3*nParticles*BOLTZMANN);
 
 	for (i=0;i<nParticles;i++) {
 		for (j=0;j<nParticles;j++) {
