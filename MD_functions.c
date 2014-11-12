@@ -2,6 +2,23 @@
 #include <math.h>
 #include <stdlib.h>
 
+double GetInstantTemperature(double vel [][3], int nParticles, double mass)
+{
+	double k = 1;		// boltzmann's constant (in metal units!!)
+	double temperature = 0;
+	int i,j;
+
+	double factor = 2/(3*nParticles*k);
+
+	for (i=0;i<nParticles;i++) {
+		for (j=0;j<nParticles;j++) {
+			temperature += factor * pow(vel[i][j],2)/mass;
+		}
+	}	
+
+	return temperature;
+}
+
 // Calculates the kinetic energy
 double GetKineticEnergy(double vel[][3], double mass, int nParticles)
 {
@@ -18,3 +35,5 @@ double GetKineticEnergy(double vel[][3], double mass, int nParticles)
 	}
 	return energy;
 }
+
+
