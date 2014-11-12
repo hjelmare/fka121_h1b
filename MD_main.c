@@ -24,8 +24,8 @@ int main()
 	int dim = 3;		// there's a few functions that are hardcoded for dim=3, not sure how to fix...
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
-	double mass = 2;		// find appropriate value for Al
-	double latticeParameter = 3;	// find appropriate value for Al
+	double mass = 0.00279636;  // 26.9815 u
+	double latticeParameter = 4.05;
 	double maxDeviation = 0.05;
 
 	// storage of physical quantities
