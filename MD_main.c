@@ -106,7 +106,7 @@ int main()
 		}
 
 		potentialEnergy = get_energy_AL(pos, supercellLength, nParticles);
-		kineticEnergy = GetKineticEnergy(dim, nParticles, vel, mass);
+		kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 		energy = potentialEnergy + kineticEnergy;
 		printf("e %e, pe %e, ke %e, v11 %e \n", energy, potentialEnergy, kineticEnergy, vel[0][0]);
 

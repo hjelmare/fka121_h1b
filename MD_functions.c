@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 // Calculates the kinetic energy
-double GetKineticEnergy(int dim, int nParticles, double vel[][3], double mass)
+double GetKineticEnergy(double vel[][3], double mass, int nParticles)
 {
 	int i,j;
 	double sum;
@@ -11,7 +11,7 @@ double GetKineticEnergy(int dim, int nParticles, double vel[][3], double mass)
 
 	for(i = 0; i<nParticles; i++) {
 		sum = 0;
-		for(j = 0; j<dim; j++) {
+		for(j = 0; j<3; j++) {
 			sum +=vel[i][j]*vel[i][j];
 		}
 		energy += sum*mass/2;
