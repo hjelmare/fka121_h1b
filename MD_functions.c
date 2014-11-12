@@ -57,13 +57,13 @@ double GetAlphaT(double wantedTemp, double currentTemp, double timestep, double 
 
 
 
-// Calculate alphaP (the modifier to get the right preassure)
-double GetAlphaP(double wantedPreassure, double currentPreassure, double timestep, double timeConstant)
+// Calculate alphaP (the modifier to get the right pressure)
+double GetAlphaP(double wantedPressure, double currentPressure, double timestep, double timeConstant)
 {
 	double kappa = 2.21901454; // Å^3/eV (at 300K)
 	double alpha;
 
-	alpha = 1 - kappa*timestep/timeConstant*(wantedPreassure - currentPreassure);
+	alpha = 1 - kappa*timestep/timeConstant*(wantedPressure - currentPressure);
 	
 	return alpha;
 }

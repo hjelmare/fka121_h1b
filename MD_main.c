@@ -17,7 +17,7 @@ int main()
 {
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
-	double totalTime = 100;
+	double totalTime = 10;
 	double timestep = 0.01;
 		
 	// physical parameters
@@ -97,8 +97,6 @@ int main()
 	FILE *totEnergyFile;
 	totEnergyFile = fopen("totEnergy.data","w");
 	fprintf(totEnergyFile, "%e \t %e \n", 0.0, energy);
-
-
 	
 	for (i=1;i<nSteps;i++) {
 		// Update velocities and positions
@@ -109,6 +107,7 @@ int main()
 			}
 		}
 		
+		// Calculate forces so that we can take the next half step
 		get_forces_AL(force, pos, supercellLength, nParticles);
 
 		// Update velocities again
@@ -126,13 +125,14 @@ int main()
 		volume = pow(nCells*latticeParameter, 3);
 		virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
 		currentPressure = GetPressure(currentTemp, volume, virial, nParticles);
+printf("vol %e lattpar %e \n", volume, latticeParameter);	// latticeParameter får helt fel värde på nåt jäkla vänster....
 
 		//Calculate alpha (the velocity and position scaling parameters)
 		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstantT); // This function calculates alpha that rescales our velocity at each timestep.
 		alphaP = GetAlphaP(wantedPressure, currentPressure, timestep, timeConstantP);
 		sqrtAlphaT = sqrt(alphaT);
 		curtAlphaP = pow(alphaP, 1.0 / 3);
-		//Rescale the velocity
+		// Rescale velocity and position (and the size of the bounding volume, right?)
 		for (j=0; j<nParticles; j++) {
 			for (k=0; k<dim; k++) {
 				vel[j][k] = vel[j][k] * sqrtAlphaT;
@@ -140,9 +140,9 @@ int main()
 				latticeParameter = latticeParameter * curtAlphaP;
 			}
 		}
-//if(i % 100 == 0){
-//		printf("alphaT = %e \t alphaP= %e \t temp= %e \t pressure= %e \n", alphaT, alphaP, currentTemp, currentPressure);
-//}
+if(i % 10 == 0){
+		printf("alphaT = %e \t alphaP= %e \t temp= %e \t pressure= %e \n", alphaT, alphaP, currentTemp, currentPressure);
+}
 		fprintf(kineticEnergyFile, "%e \t %e \n", i*timestep, kineticEnergy );
 		fprintf(potentialEnergyFile, "%e \t %e \n", i*timestep, potentialEnergy);
 		fprintf(totEnergyFile, "%e \t %e \n", i*timestep, energy);
