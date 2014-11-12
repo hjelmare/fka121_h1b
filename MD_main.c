@@ -15,39 +15,39 @@
 /* Main program */
 int main()
 {
-int i,j,k;
-int nCells = 4;
-int nParticles = 4*pow(nCells,3);
-double latticeParameter = 3;
-double pos[nParticles][3];
-double maxDeviation = 0.05;
-double vel[nParticles][3];
-double energy;
+	int i,j,k;
+	int nCells = 4;
+	int nParticles = 4*pow(nCells,3);
+	double latticeParameter = 3;
+	double pos[nParticles][3];
+	double maxDeviation = 0.05;
+	double vel[nParticles][3];
+	double energy;
     
 
-     srand(time(NULL));
-     double random_value;
+	srand(time(NULL));
+	double random_value;
      
 
-    init_fcc(pos, 4, latticeParameter);
+	init_fcc(pos, 4, latticeParameter);
 
-for(i = 0; i<nParticles; i++){
-	for (j = 0; j<3; j++){
-		random_value = (double) rand() / (double) RAND_MAX;
-		pos[i][j] = pos[i][j] + random_value * maxDeviation * latticeParameter;
- 	}
-}
-
-// set velocities to zero
-for (i = 0; i<nParticles; i++){
-	for (j = 0; j<3; j++){
-		vel[i][j] = 0;
+	for(i = 0; i<nParticles; i++){
+		for (j = 0; j<3; j++){
+			random_value = (double) rand() / (double) RAND_MAX;
+			pos[i][j] = pos[i][j] + random_value * maxDeviation * latticeParameter;
+ 		}
 	}
-}
 
-energy = get_energy_AL(pos, 4*latticeParameter, nParticles);
+	// set velocities to zero
+	for (i = 0; i<nParticles; i++){
+		for (j = 0; j<3; j++){
+			vel[i][j] = 0;
+		}
+	}
+	
+	energy = get_energy_AL(pos, 4*latticeParameter, nParticles);
 
-printf("energy = %e \n", energy);
+	printf("energy = %e \n", energy);
 
 	// so, what needs to be done? (for task 1, to begin with...)
 	// a main loop which
