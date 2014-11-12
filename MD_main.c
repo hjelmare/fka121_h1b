@@ -49,6 +49,12 @@ energy = get_energy_AL(pos, 4*latticeParameter, nParticles);
 
 printf("energy = %e \n", energy);
 
+	// so, what needs to be done? (for task 1, to begin with...)
+	// a main loop which
+	// -gets forces (there's a function for that)
+	// -moves things (verlet? or something else? did i miss something?)
+	// -calculates pe, ke, and E, and saves them for matlab plotting
+	//
     /*
      Descriptions of the different functions in the files initfcc.c and alpotential.c are listed below.
      */
@@ -82,7 +88,4 @@ printf("energy = %e \n", energy);
     /*
      get_forces_AL(f,pos, L, N);
      */
-    
-    
-    
 }
