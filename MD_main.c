@@ -112,8 +112,10 @@ int main()
 		kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 		energy = potentialEnergy + kineticEnergy;
 
+		currentTemp = GetInstantTemperature(vel, nParticles, mass);
+
 		//Calculate alpha (the velocity scaling parameter)
-		alpha = getAlpha(wantedTemp, currentTemp, timestep, timeConstant) // This function calculates alpha that rescales our velocity at each timestep.
+		alpha = GetAlpha(wantedTemp, currentTemp, timestep, timeConstant) // This function calculates alpha that rescales our velocity at each timestep.
 		square_root_of_alpha = sqrt(alpha);
 		//Rescale the velocity
 		for (j=0; j<nParticles; j++) {
