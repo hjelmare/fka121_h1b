@@ -25,6 +25,7 @@ int main()
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
 	int wantedTemp = 500;   // The temperature that we want the system to stabilize around.
+	double wantedPreassure = 300;	// The preassure that we want the system to stabilize around.
 	int timeConstant = 2;  // used in determining alpha. It's the constant that determines how fast our temperature will move towards the prefered temperature
 	double mass = 0.00279636;  // 26.9815 u
 	double latticeParameter = 4.05;
@@ -36,9 +37,12 @@ int main()
 	double force[nParticles][dim];
 	double energy, potentialEnergy, kineticEnergy;
 	double square_root_of_alpha;
-	double alpha = 1;
+	double alphaT = 1;
+	double alphaP = 1;
 	double currentTemp;
-	double sqrtAlpha;
+	double currentPreassure;
+	double sqrtAlphaT;
+	double sqrtAlphaP;
 
 	// derived quantities
 	int nSteps = (int) totalTime/timestep;
@@ -116,13 +120,15 @@ int main()
 
 		currentTemp = GetInstantTemperature(vel, nParticles, mass);
 
-		//Calculate alpha (the velocity scaling parameter)
-		alpha = GetAlpha(wantedTemp, currentTemp, timestep, timeConstant); // This function calculates alpha that rescales our velocity at each timestep.
-		sqrtAlpha = sqrt(alpha);
+		//Calculate alpha (the velocity and position scaling parameters)
+		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstant); // This function calculates alpha that rescales our velocity at each timestep.
+		alphaP = GetAlphaP(wantedPreassure, currentPreassure, timestep, timeConstant);
+		sqrtAlphaT = sqrt(alphaT);
+		curtAlphaP = pow(alphaP, 1.0 / 3);
 		//Rescale the velocity
 		for (j=0; j<nParticles; j++) {
 			for (k=0; k<dim; k++) {
-				vel[j][k] = vel[j][k] * sqrtAlpha;
+				vel[j][k] = vel[j][k] * sqrtAlphaT;
 			}
 		}
 

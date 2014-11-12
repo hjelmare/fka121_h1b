@@ -36,8 +36,8 @@ double GetKineticEnergy(double vel[][3], double mass, int nParticles)
 	return energy;
 }
 
-// Calculate alpha (the modifier to get the right temperature)
-double GetAlpha(double wantedTemp, double currentTemp, double timestep, double timeConstant)
+// Calculate alphaT (the modifier to get the right temperature)
+double GetAlphaT(double wantedTemp, double currentTemp, double timestep, double timeConstant)
 {
 	double alpha;
 	alpha = 1 + timestep/timeConstant * (wantedTemp-currentTemp)/currentTemp;
@@ -45,3 +45,13 @@ double GetAlpha(double wantedTemp, double currentTemp, double timestep, double t
 	return alpha;
 }
 
+
+
+// Calculate alphaP (the modifier to get the right preassure)
+double GetAlphaP(double wantedPreassure, double currentPreassure, double timestep, timeConstant)
+{
+	double kappa = 2.21901454 // Å^3/eV (at 300K)
+	alpha = 1 - kappa*timestep/timeConstant*(wantedPreassure - currentPreassure);
+	
+	return alpha;
+}
