@@ -40,7 +40,7 @@ int main()
 
 	// derived quantities
 	int nSteps = (int) totalTime/timestep;
-	double supercellLength = nCells * latticeParameter;	// is this right?
+	double supercellLength = nCells * latticeParameter;
 
 	// other stuff
 	int i,j,k;   
