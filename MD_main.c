@@ -17,7 +17,7 @@ int main()
 {
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
-	double totalTime = 1;
+	double totalTime = 1000;
 	double timestep = 0.1;
 		
 	// physical parameters
