@@ -24,6 +24,7 @@ int main()
 	int dim = 3;
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
+	double mass = 5;		// find appropriate value for Al
 	double latticeParameter = 3;	// find appropriate value for Al
 	double maxDeviation = 0.05;
 
@@ -61,7 +62,7 @@ int main()
 	
 	potentialEnergy = get_energy_AL(pos, supercellLength, nParticles);
 
-	printf("energy = %e \n", energy);
+	printf("energy = %e \n", potentialEnergy);
 
 	// so, what needs to be done? (for task 1, to begin with...)
 	// a main loop which
@@ -73,8 +74,9 @@ int main()
 		get_forces_AL(force, pos, supercellLength, nParticles);
 
 		// use the force to move things...?
+
 		potentialEnergy = get_energy_AL(pos, supercellLength, nParticles);
-		kineticEnergy = GetKineticEnergy(vel, nParticles);
+		kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 		energy = potentialEnergy + kineticEnergy;
 	}
     /*
