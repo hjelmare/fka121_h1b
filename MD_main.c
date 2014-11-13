@@ -17,22 +17,20 @@ int main()
 {
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
-	double totalTime = 10;
+	double totalTime = 1;
 	double timestep = 0.01;
 		
 	// physical parameters
 	int dim = 3;		// there's a few functions that are hardcoded for dim=3, not sure how to fix...
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
-	int wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
+	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
 	double wantedPressure = 6.32420934 * 0.0000001;	// The pressure that we want the system to stabilize around.
 	double timeConstantT = 0.01;  // used in determining alpha. It's the constant that determines how fast our temperature will move towards the prefered temperature
-	double timeConstantP = 0.002;
+	double timeConstantP = 0.001;
 	double mass = 0.00279636;  // 26.9815 u
 	double latticeParameter = 4.05;
 	double maxDeviation = 0.05;
-	double curtAlphaP;
-	double virial;
 
 	// storage of physical quantities
 	double pos[nParticles][dim];
@@ -45,12 +43,12 @@ int main()
 	double currentTemp;
 	double currentPressure;
 	double sqrtAlphaT;
-	double sqrtAlphaP;
+	double curtAlphaP;
+	double virial;
 	double volume;
 
 	// derived quantities
-	int nSteps = (int) totalTime/timestep;
-	double supercellLength = nCells * latticeParameter;
+	double nSteps = totalTime/timestep;
 
 	// other stuff
 	int i,j,k;   
@@ -75,7 +73,7 @@ int main()
 		}
 	}
 	
-	potentialEnergy = get_energy_AL(pos, supercellLength, nParticles);
+	potentialEnergy = get_energy_AL(pos, nCells*latticeParameter, nParticles);
 	kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 	energy = potentialEnergy + kineticEnergy;
 
@@ -103,7 +101,7 @@ printf("lattpar innan loopen: %e \n", latticeParameter);
 		}
 		
 		// Calculate forces so that we can take the next half step
-		get_forces_AL(force, pos, supercellLength, nParticles);
+		get_forces_AL(force, pos, nCells*latticeParameter, nParticles);
 
 		// Update velocities again
 		for (j=0; j<nParticles; j++) {
@@ -112,7 +110,7 @@ printf("lattpar innan loopen: %e \n", latticeParameter);
 			}
 		}
 
-		potentialEnergy = get_energy_AL(pos, supercellLength, nParticles);
+		potentialEnergy = get_energy_AL(pos, nCells*latticeParameter, nParticles);
 		kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 		energy = potentialEnergy + kineticEnergy;
 
@@ -122,13 +120,13 @@ printf("lattpar innan loopen: %e \n", latticeParameter);
 		currentPressure = GetPressure(currentTemp, volume, virial, nParticles);
 
 		//Calculate alpha (the velocity and position scaling parameters)
-		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstantT); // This function calculates alpha that rescales our velocity at each timestep.
+//		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstantT);
 		alphaP = GetAlphaP(wantedPressure, currentPressure, timestep, timeConstantP);
 		sqrtAlphaT = sqrt(alphaT);
 		curtAlphaP = pow(alphaP, 1.0 / 3);
 
 		// Rescale velocity and position (and the size of the bounding volume, right?)
-		latticeParameter = latticeParameter * curtAlphaP;
+//		latticeParameter = latticeParameter * curtAlphaP;
 //printf("lattpar: %e \n", latticeParameter);
 		for (j=0; j<nParticles; j++) {
 			for (k=0; k<dim; k++) {
@@ -136,12 +134,10 @@ printf("lattpar innan loopen: %e \n", latticeParameter);
 				pos[j][k] = pos[j][k] * curtAlphaP;
 			}
 		}
-if(i%3==0) {
-  printf("alphaP = %e, lattpar = %e, P = %e \n", alphaP, latticeParameter, currentPressure);
-}
+//printf("alphaP = %e, lattpar = %e, P = %e \n", alphaP, latticeParameter, currentPressure);
 
-if(i % 10 == 0){
-//		printf("alphaT = %e \t alphaP= %e \t temp= %e \t pressure= %e \t vel[0][0]=  %e \n", alphaT, alphaP, currentTemp, currentPressure, vel[0][0]);
+if(i <10){
+		printf("temp: %e \t alphaT: %e \t press: %e \t alphaP: %e \n", currentTemp, alphaT, currentPressure, alphaP);
 //		printf("vol= %e \t lattpar= %e \n", volume, latticeParameter);	// latticeParameter får helt fel värde på nåt jäkla vänster....
 }
 
