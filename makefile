@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -O3
+CFLAGS = -O3 -g
 LIBS = -lm
 
 HEADERS = initfcc.h alpotential.h MD_functions.h
