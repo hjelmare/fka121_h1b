@@ -150,6 +150,7 @@ if(i % 10 == 0){
 		fprintf(potentialEnergyFile, "%e \t %e \n", i*timestep, potentialEnergy);
 		fprintf(totEnergyFile, "%e \t %e \n", i*timestep, energy);
 	}
+printf("tyest 3rot ur = 8^(1/3) = %e", pow(8, 1.0/3));
 
     /*
      Descriptions of the different functions in the files initfcc.c and alpotential.c are listed below.
