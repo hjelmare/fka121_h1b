@@ -27,7 +27,7 @@ int main()
 	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
 	double wantedPressure = 6.32420934 * 0.0000001;	// The pressure that we want the system to stabilize around.
 	double timeConstantT = 0.01;  // used in determining alpha. It's the constant that determines how fast our temperature will move towards the prefered temperature
-	double timeConstantP = 0.001;
+	double timeConstantP = 0.0001;
 	double mass = 0.00279636;  // 26.9815 u
 	double latticeParameter = 4.05;
 	double maxDeviation = 0.05;
@@ -56,7 +56,7 @@ int main()
 	srand(time(NULL));
 	double random_value;
 
-	init_fcc(pos, 4, latticeParameter);
+	init_fcc(pos, nCells, latticeParameter);
 
 	for(i = 0; i<nParticles; i++){
 		for (j = 0; j<3; j++){
@@ -79,17 +79,13 @@ int main()
 
 
 	//Saving initial data:
-	FILE *kineticEnergyFile;
-	kineticEnergyFile = fopen("kineticEnergy.data","w");
-	fprintf(kineticEnergyFile, "%e \t %e \n", 0.0, kineticEnergy );
+	FILE *energyFile;
+	energyFile = fopen("energy.data","w");
+	fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, potentialEnergy, kineticEnergy);
 
-	FILE *potentialEnergyFile;
-	potentialEnergyFile = fopen("potentialEnergy.data","w");
-	fprintf(potentialEnergyFile, "%e \t %e \n", 0.0, potentialEnergy);
-	
-	FILE *totEnergyFile;
-	totEnergyFile = fopen("totEnergy.data","w");
-	fprintf(totEnergyFile, "%e \t %e \n", 0.0, energy);
+	FILE *ptFile;
+	ptFile = fopen("pt.data","w");
+
 printf("lattpar innan loopen: %e \n", latticeParameter);
 	for (i=1;i<nSteps;i++) {
 		// Update velocities and positions
@@ -120,30 +116,27 @@ printf("lattpar innan loopen: %e \n", latticeParameter);
 		currentPressure = GetPressure(currentTemp, volume, virial, nParticles);
 
 		//Calculate alpha (the velocity and position scaling parameters)
-//		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstantT);
+		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstantT);
 		alphaP = GetAlphaP(wantedPressure, currentPressure, timestep, timeConstantP);
 		sqrtAlphaT = sqrt(alphaT);
 		curtAlphaP = pow(alphaP, 1.0 / 3);
 
 		// Rescale velocity and position (and the size of the bounding volume, right?)
-//		latticeParameter = latticeParameter * curtAlphaP;
-//printf("lattpar: %e \n", latticeParameter);
+		latticeParameter = latticeParameter * curtAlphaP;
 		for (j=0; j<nParticles; j++) {
 			for (k=0; k<dim; k++) {
 				vel[j][k] = vel[j][k] * sqrtAlphaT;
 				pos[j][k] = pos[j][k] * curtAlphaP;
 			}
 		}
-//printf("alphaP = %e, lattpar = %e, P = %e \n", alphaP, latticeParameter, currentPressure);
 
-if(i <10){
-		printf("temp: %e \t alphaT: %e \t press: %e \t alphaP: %e \n", currentTemp, alphaT, currentPressure, alphaP);
+if(i % 5 == 0){
+	printf("it %d T %e \t alphaT %e \t P %e \t alphaP %e \n", i, currentTemp, alphaT, currentPressure, alphaP);
 //		printf("vol= %e \t lattpar= %e \n", volume, latticeParameter);	// latticeParameter får helt fel värde på nåt jäkla vänster....
 }
 
-		fprintf(kineticEnergyFile, "%e \t %e \n", i*timestep, kineticEnergy );
-		fprintf(potentialEnergyFile, "%e \t %e \n", i*timestep, potentialEnergy);
-		fprintf(totEnergyFile, "%e \t %e \n", i*timestep, energy);
+		fprintf(energyFile, "%e \t %e \t %e \t %e\n", i*timestep, energy, potentialEnergy, kineticEnergy );
+		fprintf(ptFile, "%e \t %e \t %e \n", i*timestep, currentPressure, currentTemp);
 	}
 printf("lattpar efter loopen: %e \n", latticeParameter);
 
