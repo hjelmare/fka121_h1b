@@ -97,7 +97,7 @@ int main()
 	FILE *totEnergyFile;
 	totEnergyFile = fopen("totEnergy.data","w");
 	fprintf(totEnergyFile, "%e \t %e \n", 0.0, energy);
-	
+
 	for (i=1;i<nSteps;i++) {
 		// Update velocities and positions
 		for (j=0; j<nParticles; j++) {
@@ -125,24 +125,27 @@ int main()
 		volume = pow(nCells*latticeParameter, 3);
 		virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
 		currentPressure = GetPressure(currentTemp, volume, virial, nParticles);
-printf("vol %e lattpar %e \n", volume, latticeParameter);	// latticeParameter får helt fel värde på nåt jäkla vänster....
 
 		//Calculate alpha (the velocity and position scaling parameters)
 		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstantT); // This function calculates alpha that rescales our velocity at each timestep.
 		alphaP = GetAlphaP(wantedPressure, currentPressure, timestep, timeConstantP);
 		sqrtAlphaT = sqrt(alphaT);
 		curtAlphaP = pow(alphaP, 1.0 / 3);
+
 		// Rescale velocity and position (and the size of the bounding volume, right?)
+		latticeParameter = latticeParameter * curtAlphaP;
 		for (j=0; j<nParticles; j++) {
 			for (k=0; k<dim; k++) {
 				vel[j][k] = vel[j][k] * sqrtAlphaT;
 				pos[j][k] = pos[j][k] * curtAlphaP;
-				latticeParameter = latticeParameter * curtAlphaP;
 			}
 		}
+
 if(i % 10 == 0){
 		printf("alphaT = %e \t alphaP= %e \t temp= %e \t pressure= %e \n", alphaT, alphaP, currentTemp, currentPressure);
+		printf("vol= %e \t lattpar= %e \n", volume, latticeParameter);	// latticeParameter får helt fel värde på nåt jäkla vänster....
 }
+
 		fprintf(kineticEnergyFile, "%e \t %e \n", i*timestep, kineticEnergy );
 		fprintf(potentialEnergyFile, "%e \t %e \n", i*timestep, potentialEnergy);
 		fprintf(totEnergyFile, "%e \t %e \n", i*timestep, energy);
