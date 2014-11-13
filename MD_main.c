@@ -24,10 +24,10 @@ int main()
 	int dim = 3;		// there's a few functions that are hardcoded for dim=3, not sure how to fix...
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
-	int wantedTemp = 500;   // The temperature that we want the system to stabilize around.
-	double wantedPressure = 6.32420934 * 0.0000001;	// The preassure that we want the system to stabilize around.
+	int wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
+	double wantedPressure = 6.32420934 * 0.0000001;	// The pressure that we want the system to stabilize around.
 	double timeConstantT = 0.01;  // used in determining alpha. It's the constant that determines how fast our temperature will move towards the prefered temperature
-	double timeConstantP = 0.01;
+	double timeConstantP = 0.002;
 	double mass = 0.00279636;  // 26.9815 u
 	double latticeParameter = 4.05;
 	double maxDeviation = 0.05;
@@ -63,14 +63,15 @@ int main()
 	for(i = 0; i<nParticles; i++){
 		for (j = 0; j<3; j++){
 			random_value = (double) rand() / (double) RAND_MAX;
-			pos[i][j] = pos[i][j] + random_value * maxDeviation * latticeParameter;
+			pos[i][j] = pos[i][j] + (random_value-0.5) * maxDeviation * latticeParameter;
  		}
 	}
 
-	// set velocities to zero
+	// initialize velocities and forces to zero
 	for (i = 0; i<nParticles; i++){
 		for (j = 0; j<3; j++){
 			vel[i][j] = 0;
+			force[i][j] = 0;
 		}
 	}
 	
@@ -78,12 +79,6 @@ int main()
 	kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 	energy = potentialEnergy + kineticEnergy;
 
-
-	// so, what needs to be done? (for task 1, to begin with...)
-	// a main loop which
-	// -gets forces (there's a function for that)
-	// -moves things (verlet? or something else? did i miss something?)
-	// -calculates pe, ke, and E, and saves them for matlab plotting
 
 	//Saving initial data:
 	FILE *kineticEnergyFile;
@@ -97,7 +92,7 @@ int main()
 	FILE *totEnergyFile;
 	totEnergyFile = fopen("totEnergy.data","w");
 	fprintf(totEnergyFile, "%e \t %e \n", 0.0, energy);
-
+printf("lattpar innan loopen: %e \n", latticeParameter);
 	for (i=1;i<nSteps;i++) {
 		// Update velocities and positions
 		for (j=0; j<nParticles; j++) {
@@ -134,22 +129,27 @@ int main()
 
 		// Rescale velocity and position (and the size of the bounding volume, right?)
 		latticeParameter = latticeParameter * curtAlphaP;
+//printf("lattpar: %e \n", latticeParameter);
 		for (j=0; j<nParticles; j++) {
 			for (k=0; k<dim; k++) {
 				vel[j][k] = vel[j][k] * sqrtAlphaT;
 				pos[j][k] = pos[j][k] * curtAlphaP;
 			}
 		}
+if(i%3==0) {
+  printf("alphaP = %e, lattpar = %e, P = %e \n", alphaP, latticeParameter, currentPressure);
+}
 
 if(i % 10 == 0){
-		printf("alphaT = %e \t alphaP= %e \t temp= %e \t pressure= %e \t vel[0][0]=  %e \n", alphaT, alphaP, currentTemp, currentPressure, vel[0][0]);
-		// printf("vol= %e \t lattpar= %e \n", volume, latticeParameter);	// latticeParameter får helt fel värde på nåt jäkla vänster....
+//		printf("alphaT = %e \t alphaP= %e \t temp= %e \t pressure= %e \t vel[0][0]=  %e \n", alphaT, alphaP, currentTemp, currentPressure, vel[0][0]);
+//		printf("vol= %e \t lattpar= %e \n", volume, latticeParameter);	// latticeParameter får helt fel värde på nåt jäkla vänster....
 }
 
 		fprintf(kineticEnergyFile, "%e \t %e \n", i*timestep, kineticEnergy );
 		fprintf(potentialEnergyFile, "%e \t %e \n", i*timestep, potentialEnergy);
 		fprintf(totEnergyFile, "%e \t %e \n", i*timestep, energy);
 	}
+printf("lattpar efter loopen: %e \n", latticeParameter);
 
     /*
      Descriptions of the different functions in the files initfcc.c and alpotential.c are listed below.
