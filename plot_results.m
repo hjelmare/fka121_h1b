@@ -26,7 +26,8 @@ legend('total energy', 'potential energy', 'kinetic energy', 'pressure', 'temp')
 ylabel('energy [eV]');
 xlabel('time (ps)');
 
-startTime = 40;
+useFrom = 0.4;
+start = fix(length(energy)*useFrom);
 
-meanTemp = mean(temp(startTime:end))
-meanPress = mean(pressure(startTime:end))
+meanTemp = mean(temp(start:end))
+meanPress = mean(pressure(start:end))
