@@ -17,7 +17,7 @@ int main()
 {
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
-	double totalTime = 1;
+	double totalTime = 5;
 	double timestep = 0.01;
 		
 	// physical parameters
@@ -26,8 +26,9 @@ int main()
 	int nParticles = 4*pow(nCells,dim);
 	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
 	double wantedPressure = 6.32420934 * 0.0000001;	// The pressure that we want the system to stabilize around.
-	double timeConstantT = 0.01;  // used in determining alpha. It's the constant that determines how fast our temperature will move towards the prefered temperature
-	double timeConstantP = 0.0001;
+	wantedPressure = 5*0.00001;
+	double timeConstantT = 0.02;  // used in determining alpha. It's the constant that determines how fast our temperature will move towards the prefered temperature
+	double timeConstantP = 0.05;
 	double mass = 0.00279636;  // 26.9815 u
 	double latticeParameter = 4.05;
 	double maxDeviation = 0.05;
@@ -132,7 +133,6 @@ printf("lattpar innan loopen: %e \n", latticeParameter);
 
 if(i % 5 == 0){
 	printf("it %d T %e \t alphaT %e \t P %e \t alphaP %e \n", i, currentTemp, alphaT, currentPressure, alphaP);
-//		printf("vol= %e \t lattpar= %e \n", volume, latticeParameter);	// latticeParameter får helt fel värde på nåt jäkla vänster....
 }
 
 		fprintf(energyFile, "%e \t %e \t %e \t %e\n", i*timestep, energy, potentialEnergy, kineticEnergy );

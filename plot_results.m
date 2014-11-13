@@ -13,7 +13,6 @@ data = importdata('pt.data');
 pressure = data(:,2);
 temp = data(:,3);
 
-%%
 clf
 
 hold on
@@ -26,3 +25,8 @@ plot(time(2:end), temp, 'k');
 legend('total energy', 'potential energy', 'kinetic energy', 'pressure', 'temp');
 ylabel('energy [eV]');
 xlabel('time (ps)');
+
+startTime = 40;
+
+meanTemp = mean(temp(startTime:end))
+meanPress = mean(pressure(startTime:end))
