@@ -13,7 +13,7 @@ double GetPressure(double temperature, double volume, double virial, int nPartic
 	return pressure;
 }
 
-double GetInstantTemperature(double vel [][3], int nParticles, double mass)
+double GetInstantTemperature(double vel [][3], int nParticles, double mass, int dim)
 {
 	double temperature = 0;
 	int i,j;
@@ -21,7 +21,7 @@ double GetInstantTemperature(double vel [][3], int nParticles, double mass)
 	double factor = 2/(3*nParticles*BOLTZMANN);
 
 	for (i=0;i<nParticles;i++) {
-		for (j=0;j<nParticles;j++) {
+		for (j=0;j<dim;j++) {  // ändrade i denna for-loop, den gick till nParticles, men ska väl bara gå över dimensionerna /Albin
 			temperature += factor * pow(vel[i][j],2)*mass/2;
 		}
 	}	

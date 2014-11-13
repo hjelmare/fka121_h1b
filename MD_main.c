@@ -121,7 +121,7 @@ int main()
 		kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 		energy = potentialEnergy + kineticEnergy;
 
-		currentTemp = GetInstantTemperature(vel, nParticles, mass);
+		currentTemp = GetInstantTemperature(vel, nParticles, mass, dim);
 		volume = pow(nCells*latticeParameter, 3);
 		virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
 		currentPressure = GetPressure(currentTemp, volume, virial, nParticles);
@@ -142,8 +142,8 @@ int main()
 		}
 
 if(i % 10 == 0){
-		printf("alphaT = %e \t alphaP= %e \t temp= %e \t pressure= %e \n", alphaT, alphaP, currentTemp, currentPressure);
-		printf("vol= %e \t lattpar= %e \n", volume, latticeParameter);	// latticeParameter får helt fel värde på nåt jäkla vänster....
+		printf("alphaT = %e \t alphaP= %e \t temp= %e \t pressure= %e \t vel[0][0]=  %e \n", alphaT, alphaP, currentTemp, currentPressure, vel[0][0]);
+		// printf("vol= %e \t lattpar= %e \n", volume, latticeParameter);	// latticeParameter får helt fel värde på nåt jäkla vänster....
 }
 
 		fprintf(kineticEnergyFile, "%e \t %e \n", i*timestep, kineticEnergy );
