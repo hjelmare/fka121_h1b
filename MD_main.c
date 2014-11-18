@@ -58,7 +58,7 @@ int main()
 	double test=0;
 	double meanTemp, meanPressure, meanSquareTemp, meanSquarePressure, meanTemp_ik[correlationDistance-1], meanPressure_ik[correlationDistance-1];
 	double phiTemp[correlationDistance], phiPressure[correlationDistance], meanTempSquare, meanPressureSquare;
-	
+	double varTemp, varPressure;	
 
 	// derived quantities
 	double nSteps = totalTime/timestep;
@@ -216,13 +216,32 @@ for(i = 0; i<correlationDistance; i++){
 //Calculates phi
 meanTempSquare = meanTemp*meanTemp;
 meanPressureSquare = meanPressure*meanPressure;
+
+// sparar värdena så att jag kan plotta dem och se om de blir vettiga.
+FILE *phiTempFile;
+phiTempFile = fopen("phiTemp.data","w");
+
+FILE *phiPFile;
+phiPFile = fopen("phiPressure.data","w");
+fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, potentialEnergy, kineticEnergy);
 for(i = 0; i<correlationDistance; i++){
 	phiTemp[i] = (meanTemp_ik[i] - meanTempSquare)/(meanSquareTemp - meanTempSquare);
 	phiPressure[i] = (meanPressure_ik[i] - meanPressureSquare)/(meanSquarePressure - meanPressureSquare);
 
-	printf("k=%d   -->   phi T = %e   phi P = %e \n", i, phiTemp[i], phiPressure[i]); 
+	//printf("k=%d   -->   phi T = %e   phi P = %e \n", i, phiTemp[i], phiPressure[i]); 
+	fprintf(phiTempFile, "%d \t %e \n", i+1, phiTemp[i]);
+	fprintf(phiPFile, "%d \t %e \n", i+1, phiPressure[i]);
 }
 
+double s = 10;
+varTemp = meanSquareTemp - meanTempSquare;
+varPressure = meanSquarePressure - meanPressureSquare;
+
+varTemp = varTemp*s/(nSteps - equilibrationSteps);
+varPressure = varPressure*s/(nSteps - equilibrationSteps);
+
+printf("\n OBS!!! nu är s hårdkodad, måste titta på bilderna i matlab eller göra det automatiskt för att det ska stämma. Jag har bara gjort ett uttryck för variationen!!! \n");
+printf("the variation of the temperature is %e \t the variation of the pressure is %e \n", varTemp, varPressure);
 
 		// Savesthevalues needed to calculate the statistical inefficiency (s), for T and P.
 		
