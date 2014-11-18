@@ -38,7 +38,7 @@ int main()
 	double vel[nParticles][dim];
 	double force[nParticles][dim];
 	double energy, potentialEnergy, kineticEnergy;
-	double square_root_of_alpha;
+	double siquare_root_of_alpha;
 	double alphaT = 1;
 	double alphaP = 1;
 	double currentTemp;
