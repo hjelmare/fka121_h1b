@@ -130,7 +130,7 @@ printf("lattpar innan loopen: %e \n", latticeParameter);
 				pos[j][k] = pos[j][k] * curtAlphaP;
 			}
 		}
-
+		
 if(i % 5 == 0){
 	printf("it %d T %e \t alphaT %e \t P %e \t alphaP %e \n", i, currentTemp, alphaT, currentPressure, alphaP);
 }
@@ -175,4 +175,5 @@ printf("lattpar efter loopen: %e \n", latticeParameter);
     /*
      get_forces_AL(f,pos, L, N);
      */
+>>>>>>> 5f87f93470cfda3cd81ecf11fe38acdcd47701cd
 }
