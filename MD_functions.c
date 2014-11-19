@@ -4,6 +4,19 @@
 
 #define BOLTZMANN 8.6173324*0.00001	// in eV/K
 
+double ScalarProduct(double vec1[3], double vec2[3])
+{
+	double product = 0;
+	int i;
+
+	for(i = 0 ; i < 3 ; i++) {
+		product += vec1[i]*vec2[i];
+	}
+
+	return product;
+}
+
+
 double GetPressure(double temperature, double volume, double virial, int nParticles)
 {
 	double pressure = 0;

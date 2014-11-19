@@ -31,3 +31,13 @@ start = fix(length(energy)*useFrom);
 
 meanTemp = mean(temp(start:end))
 meanPress = mean(pressure(start:end))
+
+%%
+
+clear all
+clc
+clf
+
+data = importdata('velcor.data');
+
+plot(data(:,1),data(:,2))
