@@ -58,7 +58,8 @@ int main()
 	double test=0;
 	double meanTemp, meanPressure, meanSquareTemp, meanSquarePressure, meanTemp_ik[correlationDistance-1], meanPressure_ik[correlationDistance-1];
 	double phiTemp[correlationDistance], phiPressure[correlationDistance], meanTempSquare, meanPressureSquare;
-	double varTemp, varPressure;	
+	double varTemp, varPressure;
+	double sTemp, sPressure;	
 
 	// derived quantities
 	double nSteps = totalTime/timestep;
@@ -99,7 +100,8 @@ int main()
 	FILE *ptFile;
 	ptFile = fopen("pt.data","w");
 
-
+	FILE *positionFile;
+	positionFile = fopen("position.data","w");
 
 	for (i=1;i<equilibrationSteps;i++) {
 		// Update velocities and positions
@@ -146,6 +148,9 @@ int main()
 	}
 
 	for (i=equilibrationSteps;i<nSteps;i++) {
+		//Save positions (to check wether a solid or liquid)
+		fprintf(positionFile, "%d \t %e \t %e \t %e \n", i-equilibrationSteps, pos[1][1], pos[1][2], pos[1][3]); //OBS Sparar bara x-coord, bör räcka för att kontrollera om vätska elelr solid.
+
 		// Update velocities and positions
 		for (j=0; j<nParticles; j++) {
 			for (k = 0; k<dim; k++) {
@@ -181,8 +186,7 @@ int main()
 		//Saves temp and preassure values in order to calculate s.
 		if (i < equilibrationSteps + correlationDistance){
 		savedValuesT[i % correlationDistance] = currentTemp;
-		savedValuesP[i % correlationDistance] = currentPressure;
-		printf("\n i=%d \t sparat T = %e \n", i, savedValuesT[0]);		
+		savedValuesP[i % correlationDistance] = currentPressure;		
 		}else{  
 			test += 1;
 			// updates the saved values.
@@ -227,22 +231,37 @@ fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, potentialEnergy, kin
 for(i = 0; i<correlationDistance; i++){
 	phiTemp[i] = (meanTemp_ik[i] - meanTempSquare)/(meanSquareTemp - meanTempSquare);
 	phiPressure[i] = (meanPressure_ik[i] - meanPressureSquare)/(meanSquarePressure - meanPressureSquare);
-
-	//printf("k=%d   -->   phi T = %e   phi P = %e \n", i, phiTemp[i], phiPressure[i]); 
-	fprintf(phiTempFile, "%d \t %e \n", i+1, phiTemp[i]);
+ 
+	fprintf(phiTempFile, "%d \t %e \n", i+1, phiTemp[i]); //Dessa behövs inte. De används bara för att kolla i matlab att vi får något vettigt!!!
 	fprintf(phiPFile, "%d \t %e \n", i+1, phiPressure[i]);
 }
 
-double s = 10;
+// finds s automatic (so that we don't have to read it from a plot)
+temp = exp(-2.0);
+for(i = 0; i<correlationDistance; i++){
+	sTemp  = i+1;
+	if( phiTemp[i] < temp){
+		i = correlationDistance;
+	}
+}
+
+
+for(i = 0; i<correlationDistance; i++){
+	sPressure  = i+1;
+	if( phiPressure[i] < temp){
+		i = correlationDistance;
+	}
+}
+
+
 varTemp = meanSquareTemp - meanTempSquare;
 varPressure = meanSquarePressure - meanPressureSquare;
 
-varTemp = varTemp*s/(nSteps - equilibrationSteps);
-varPressure = varPressure*s/(nSteps - equilibrationSteps);
+varTemp = varTemp*sTemp/(nSteps - equilibrationSteps);
+varPressure = varPressure*sPressure/(nSteps - equilibrationSteps);
 
-printf("\n OBS!!! nu är s hårdkodad, måste titta på bilderna i matlab eller göra det automatiskt för att det ska stämma. Jag har bara gjort ett uttryck för variationen!!! \n");
-printf("the variation of the temperature is %e \t the variation of the pressure is %e \n", varTemp, varPressure);
-
+printf("The s parameters are: sTemp= %e \t sPressure= %e \nthe variation of the temperature is %e \t the variation of the pressure is %e \n",sTemp, sPressure, varTemp, varPressure);
+printf("våra s-värden är inte så rimliga. Har vi för stort tidssteg? för liten equilibrationsteps? för få tidssteg?")
 		// Savesthevalues needed to calculate the statistical inefficiency (s), for T and P.
 		
 /*		
