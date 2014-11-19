@@ -18,7 +18,7 @@ int main()
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
 	double totalTime = 10;
-	int msdSteps = 10;	
+	int msdStep = 10;	
 	double timestep = 0.01;
 	double equilibrationTime = 5;
 	
@@ -62,20 +62,17 @@ int main()
 	double phiTemp[correlationDistance], phiPressure[correlationDistance], meanTempSquare, meanPressureSquare;
 	double varTemp, varPressure;
 	double sTemp, sPressure;
+	double savedPos[msdStep][nParticles][dim];
 
 	// derived quantities
 	double nSteps = totalTime/timestep;
 
 	// other stuff
-	int i,j,k;   
+	int i,j,k,m;   
 
 	srand(time(NULL));
 	double random_value;
 
-	// correlationDistance får inte vara större än msdSteps
-	if(msdSteps > correlationDistance){
-		printf("ERROR   -   msdSteps can't be larger than the correlationDistance in this code!");
-	}
 
 	init_fcc(pos, nCells, latticeParameter);
 
@@ -195,7 +192,7 @@ int main()
 		savedValuesT[i % correlationDistance] = currentTemp;
 		savedValuesP[i % correlationDistance] = currentPressure;		
 		}else{  
-			test += 1;
+			
 			// updates the saved values.
 			for (j = 0; j<correlationDistance - 1; j++){	
 			savedValuesT[j] = savedValuesT[j+1];
@@ -211,11 +208,27 @@ int main()
 			}
 		}
 
-		if(i <  equilibrationSteps + msdSteps){
+		if(i <  equilibrationSteps + msdStep){
 			for(j = 0; j<nParticles; j++){
-				fir (k = 0; k<dim; k++){
-				savedPos[]
+				for (k = 0; k<dim; k++){
+					savedPos[i % msdStep][j][k] = pos[j][k];
+				} 
+			}
+		}else{
+			for (j = 0; j<msdStep-1; j++){
+				for (k = 0; k<nParticles; k++){
+					for (m = 0; m<dim; m++){
+						savedPos[j][k][m] = savedPos[j+1][k][m];
+					}
+				}
+			}
+			for (j = 0; j<nParticles; j++){
+				for (k=0; k<dim; k++){
+					savedPos[msdStep-1][j][k] = pos[j][k];
+				}
+			}
 		}
+	printf("positionerna är: %e \t %e \t %e \t %e \t och current pos= %e \n", savedPos[0][1][1], savedPos[1][1][1], savedPos[2][1][1], savedPos[3][1][1], pos[1][1]);
 	}
 
 meanTemp = meanTemp/(nSteps-equilibrationSteps);
@@ -273,8 +286,8 @@ varPressure = meanSquarePressure - meanPressureSquare;
 varTemp = varTemp*sTemp/(nSteps - equilibrationSteps);
 varPressure = varPressure*sPressure/(nSteps - equilibrationSteps);
 
-printf("The s parameters are: sTemp= %e \t sPressure= %e \nthe variation of the temperature is %e \t the variation of the pressure is %e \n",sTemp, sPressure, varTemp, varPressure);
-printf("våra s-värden är inte så rimliga. Har vi för stort tidssteg? för liten equilibrationsteps? för få tidssteg?")
+//printf("The s parameters are: sTemp= %e \t sPressure= %e \nthe variation of the temperature is %e \t the variation of the pressure is %e \n",sTemp, sPressure, varTemp, varPressure);
+//printf("våra s-värden är inte så rimliga. Har vi för stort tidssteg? för liten equilibrationsteps? för få tidssteg?");
 		// Savesthevalues needed to calculate the statistical inefficiency (s), for T and P.
 		
 /*		
@@ -332,5 +345,5 @@ close(donefile);
      get_forces_AL(f,pos, L, N);
      */
 // >>>>>>> 5f87f93470cfda3cd81ecf11fe38acdcd47701cd
->>>>>>> baa54c5f930a19d93080618648a8940dea96abd2
+
 }
