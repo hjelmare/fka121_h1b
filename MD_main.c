@@ -18,9 +18,11 @@ int main()
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
 	double totalTime = 10;
+	int msdSteps = 10;	
 	double timestep = 0.01;
 	double equilibrationTime = 5;
-		
+	
+			
 	// physical parameters
 	int dim = 3;		// there's a few functions that are hardcoded for dim=3, not sure how to fix...
 	int nCells = 4;
@@ -59,7 +61,7 @@ int main()
 	double meanTemp, meanPressure, meanSquareTemp, meanSquarePressure, meanTemp_ik[correlationDistance-1], meanPressure_ik[correlationDistance-1];
 	double phiTemp[correlationDistance], phiPressure[correlationDistance], meanTempSquare, meanPressureSquare;
 	double varTemp, varPressure;
-	double sTemp, sPressure;	
+	double sTemp, sPressure;
 
 	// derived quantities
 	double nSteps = totalTime/timestep;
@@ -69,6 +71,11 @@ int main()
 
 	srand(time(NULL));
 	double random_value;
+
+	// correlationDistance får inte vara större än msdSteps
+	if(msdSteps > correlationDistance){
+		printf("ERROR   -   msdSteps can't be larger than the correlationDistance in this code!");
+	}
 
 	init_fcc(pos, nCells, latticeParameter);
 
@@ -199,9 +206,15 @@ int main()
 			
 			// calculates and saves f_i*f_k
 			for (j = 1; j<correlationDistance; j++){
-			meanTemp_ik[j-1] += savedValuesT[0] * savedValuesT[j];
-			meanPressure_ik[j-1] += savedValuesP[0]* savedValuesP[j];
+				meanTemp_ik[j-1] += savedValuesT[0] * savedValuesT[j];
+				meanPressure_ik[j-1] += savedValuesP[0]* savedValuesP[j];
 			}
+		}
+
+		if(i <  equilibrationSteps + msdSteps){
+			for(j = 0; j<nParticles; j++){
+				fir (k = 0; k<dim; k++){
+				savedPos[]
 		}
 	}
 
