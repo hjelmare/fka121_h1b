@@ -1,0 +1,14 @@
+# Object files
+*.o
+
+# Executables
+*.exe
+MD
+
+# Data files
+*.data
+*.eps
+
+# Temp files
+*~
+

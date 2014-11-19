@@ -31,7 +31,7 @@ int main()
 	int equilibrationSteps = equilibrationTime/timestep;
 	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
 	double wantedPressure = 6.32420934 * 0.0000001;	// The pressure that we want the system to stabilize around.
-	wantedPressure = 5*0.00001;
+//	wantedPressure = 5*0.00001;
 	double timeConstantT = 0.02;  // used in determining alpha. It's the constant that determines how fast our temperature will move towards the prefered temperature
 	double timeConstantP = 0.05;
 	double mass = 0.00279636;  // 26.9815 u
@@ -287,6 +287,15 @@ if(i % 5 == 0){
 	}
 
 printf("lattpar efter loopen: %e \n", latticeParameter);
+<<<<<<< HEAD
+
+FILE *donefile;
+donefile = fopen("done.data", "w");
+fprintf(donefile, "done");
+close(donefile);
+
+
+=======
 */
 
     /*
@@ -323,4 +332,5 @@ printf("lattpar efter loopen: %e \n", latticeParameter);
      get_forces_AL(f,pos, L, N);
      */
 // >>>>>>> 5f87f93470cfda3cd81ecf11fe38acdcd47701cd
+>>>>>>> baa54c5f930a19d93080618648a8940dea96abd2
 }
