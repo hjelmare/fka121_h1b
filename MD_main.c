@@ -103,6 +103,8 @@ int main()
 	FILE *positionFile;
 	positionFile = fopen("position.data","w");
 
+	printf("Starting equilibration\n");
+
 	for (i=1;i<equilibrationSteps;i++) {
 		// Update velocities and positions
 		for (j=0; j<nParticles; j++) {
@@ -146,6 +148,8 @@ int main()
 			}
 		}
 	}	// End of equilibration loop
+
+	printf("Equilibration finished, starting production\n");
 
 	for (i=equilibrationSteps;i<nSteps;i++) {
 		//Save positions (to check wether a solid or liquid)
@@ -205,6 +209,8 @@ int main()
 		}
 	}	// End of production loop
 
+	printf("Production finished, clean up starting\n");
+
 	meanTemp = meanTemp/(nSteps-equilibrationSteps);
 	meanSquareTemp = meanSquareTemp/(nSteps-equilibrationSteps);
 	meanPressure = meanPressure/(nSteps-equilibrationSteps);
@@ -261,7 +267,7 @@ int main()
 	varPressure = varPressure*sPressure/(nSteps - equilibrationSteps);
 
 	printf("The s parameters are: sTemp= %e \t sPressure= %e \nthe variation of the temperature is %e \t the variation of the pressure is %e \n",sTemp, sPressure, varTemp, varPressure);
-	printf("våra s-värden är inte så rimliga. Har vi för stort tidssteg? för liten equilibrationsteps? för få tidssteg?");
+	printf("våra s-värden är inte så rimliga. Har vi för stort tidssteg? för liten equilibrationsteps? för få tidssteg?\n");
 	// Saves the values needed to calculate the statistical inefficiency (s), for T and P.
 		
 
