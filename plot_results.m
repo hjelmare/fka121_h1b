@@ -33,5 +33,20 @@ xlabel('time (ps)');
 %useFrom = 0.4;
 %start = fix(length(energy)*useFrom);
 
+<<<<<<< HEAD
 %meanTemp = mean(temp(start:end))
 %meanPress = mean(pressure(start:end))
+=======
+meanTemp = mean(temp(start:end))
+meanPress = mean(pressure(start:end))
+
+%%
+
+clear all
+clc
+clf
+
+data = importdata('velcor.data');
+
+plot(data(:,1),data(:,2))
+>>>>>>> 2ea529a6a51b442c974fbdd948fd05dcd4568c6f

@@ -12,6 +12,8 @@
 #include "alpotential.h"
 #include "MD_functions.h"
 
+#define PI 3.14159265368979
+
 /* Main program */
 int main()
 {
@@ -26,7 +28,7 @@ int main()
 	// physical parameters
 	int dim = 3;		// do not change. some functions are hardcoded for dim = 3.
 	int nCells = 4;
-	int correlationDistance = 50;	// this constant determines how separated the points should be in the corr.function (for temperature)
+	int correlationDistance = 150;	// this constant determines how separated the points should be in the corr.function (for temperature)
 	int nParticles = 4*pow(nCells,dim);
 	int equilibrationSteps = equilibrationTime/timestep;
 	double wantedTemp = 700+273;   // The temperature that we want the system to stabilize around.
@@ -66,6 +68,9 @@ int main()
 	double sTemp, sPressure;
 	double savedPos[msdStep][nParticles][dim];
 	double msd;
+	double savedVelocities[correlationDistance][nParticles][dim];
+	double meanVelocityScalar[correlationDistance][nParticles];
+	double meanVelocityAverage[correlationDistance];
 
 	// derived quantities
 	double nSteps = totalTime/timestep;
@@ -196,10 +201,10 @@ int main()
 		meanPressure += currentPressure;
 		meanSquareTemp += currentTemp * currentTemp;
 		meanSquarePressure += currentPressure * currentPressure;
-		//Saves temp and preassure values in order to calculate s.
-		if (i < equilibrationSteps + correlationDistance){
-			savedValuesT[i % correlationDistance] = currentTemp;
-			savedValuesP[i % correlationDistance] = currentPressure;		
+		//Saves temp and pressure values in order to calculate s.
+		if (i < equilibrationSteps + correlationDistance) {
+			savedValuesT[i - equilibrationSteps] = currentTemp;
+			savedValuesP[i - equilibrationSteps] = currentPressure;		
 		} else {  
 			test += 1;
 			// updates the saved values.
@@ -216,22 +221,51 @@ int main()
 				meanPressure_ik[j-1] += savedValuesP[0]* savedValuesP[j];
 			}
 		}
-		if(i <  equilibrationSteps + msdStep){
-			for(j = 0; j<nParticles; j++){
-				for (k = 0; k<dim; k++){
+
+		// Initial attempt at getting the velocity correlation function.... NOT WORKING CORRECTLY?(?)
+		if (i < equilibrationSteps + correlationDistance) {
+			for (m = 0; m < nParticles ; m++) {
+				savedVelocities[i - equilibrationSteps][m][0] = vel[m][0];
+				savedVelocities[i - equilibrationSteps][m][1] = vel[m][1];
+				savedVelocities[i - equilibrationSteps][m][2] = vel[m][2];
+			}
+		} else {
+			for (j = 0; j<correlationDistance - 1 ; j++) {
+				for (m = 0; m<nParticles;  m++) {
+					savedVelocities[j][m][0] = savedVelocities[j+1][m][0];
+					savedVelocities[j][m][1] = savedVelocities[j+1][m][1];
+					savedVelocities[j][m][2] = savedVelocities[j+1][m][2];
+				}
+			}
+			for (m = 0; m<nParticles; m++) {
+				savedVelocities[correlationDistance-1][m][0] = vel[m][0];
+				savedVelocities[correlationDistance-1][m][1] = vel[m][1];
+				savedVelocities[correlationDistance-1][m][2] = vel[m][2];
+			}
+
+			for (j = 0; j<correlationDistance - 1; j++) {
+				for (m = 0; m < nParticles; m++) {
+					meanVelocityScalar[j][m] += ScalarProduct(savedVelocities[0][m],savedVelocities[j+1][m]);
+				}
+			}
+		}
+
+		if(i <  equilibrationSteps + msdStep) {
+			for(j = 0; j<nParticles; j++) {
+				for (k = 0; k<dim; k++) {
 					savedPos[i % msdStep][j][k] = pos[j][k];
 				} 
 			}
-		}else{
-			for (j = 0; j<msdStep-1; j++){
-				for (k = 0; k<nParticles; k++){
-					for (m = 0; m<dim; m++){
+		} else {
+			for (j = 0; j<msdStep-1; j++) {
+				for (k = 0; k<nParticles; k++) {
+					for (m = 0; m<dim; m++) {
 						savedPos[j][k][m] = savedPos[j+1][k][m];
 					}
 				}
 			}
-			for (j = 0; j<nParticles; j++){
-				for (k=0; k<dim; k++){
+			for (j = 0; j<nParticles; j++) {
+				for (k=0; k<dim; k++) {
 					savedPos[msdStep-1][j][k] = pos[j][k];
 				}
 			}
@@ -243,8 +277,6 @@ int main()
 			}
 			msd += temp;
 		}
-	
-	//printf("positionerna är: %e \t %e \t %e \t %e \t och current pos= %e \n", savedPos[0][1][1], savedPos[1][1][1], savedPos[2][1][1], savedPos[3][1][1], pos[1][1]);
 	}	// End of production loop
 
 	printf("Production finished, clean up starting\n");
@@ -262,7 +294,37 @@ int main()
 	}
 	
 	msd = msd/temp;
-	printf("msd= %e", msd);
+	printf("msd= %e DETTA ÄR INTE KLART", msd);
+
+	// Final processing and saving of velocity correlation function
+	FILE *velcorFile;
+	velcorFile = fopen("velcor.data","w");
+
+	for( i = 0; i < correlationDistance; i++) {
+		meanVelocityAverage[i] = 0;
+		for (j = 0; j<nParticles; j++) {
+			meanVelocityScalar[i][j] = meanVelocityScalar[i][j]/temp;
+			meanVelocityAverage[i] += meanVelocityScalar[i][j];
+		}
+		meanVelocityAverage[i] = meanVelocityAverage[i]/nParticles;
+		fprintf(velcorFile, "%d\t%e\n", i, meanVelocityAverage[i]);
+	}
+
+	// Calculating and saving spectrum integral thingy - NEEDS CLEAN UP!!!
+	FILE *spectrumFile;
+	spectrumFile = fopen("spectrum.data","w");
+	
+	double spectrum[1000];
+
+	for( i = 0; i < 1000; i++) {
+		spectrum[i] = 0;
+		for( j = 0; j<correlationDistance; j++) {
+			spectrum[i] += meanVelocityAverage[j]*cos(2*PI*i*j/1000);
+		}
+		spectrum[i] = spectrum[i]/correlationDistance;
+		fprintf(spectrumFile,"%d\t%e\n",i,spectrum[i]);
+	}
+
 	//Calculates phi
 	meanTempSquare = meanTemp*meanTemp;
 	meanPressureSquare = meanPressure*meanPressure;
