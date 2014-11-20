@@ -21,19 +21,21 @@ int main()
 	// simulation settings
 	double productionTime = 5;
 	double equilibrationTime = 5;
-	int msdStep = 10;	// vad är detta?	
 	double timestep = 0.01;
 //	timestep = 0.1;
 	timestep = 0.001;
+	
+	int msdStep = 10;	// vad är detta?	
+	
 	int nSpectrumPoints = 1000;
 	double spectrumInterval = PI;
+	
+	double maxCorrelationTime = 1;
 			
 	// physical parameters
 	int dim = 3;		// do not change. some functions are hardcoded for dim = 3.
 	int nCells = 4;
-	int correlationDistance = 150;	//this constant determines how separated the points should be in the corr.function (for temperature)
 	int nParticles = 4*pow(nCells,dim);
-	int equilibrationSteps = equilibrationTime/timestep;
 	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
 //	wantedTemp = 700+273;
 //	wantedTemp = 900+273;
@@ -46,14 +48,20 @@ int main()
 	double latticeParameter = 4.05;
 	double maxDeviation = 0.05;
 
+	// derived quantities
+	double nEquilibrationSteps = equilibrationTime/timestep;
+	double nProductionSteps = productionTime/timestep;
+	int equilibrationSteps = equilibrationTime/timestep;
+	int maxCorrelationSteps = maxCorrelationTime/timestep;
+
 	// storage of physical quantities
 	double pos[nParticles][dim];
 	double vel[nParticles][dim];
 	double force[nParticles][dim];
-	double savedValuesT[correlationDistance];
-	double meanValuesT[correlationDistance];
-	double savedValuesP[correlationDistance];
-	double meanValuesP[correlationDistance];
+	double savedValuesT[maxCorrelationSteps];
+	double meanValuesT[maxCorrelationSteps];
+	double savedValuesP[maxCorrelationSteps];
+	double meanValuesP[maxCorrelationSteps];
 	double energy, potentialEnergy, kineticEnergy;
 	double siquare_root_of_alpha;
 	double alphaT = 1;
@@ -64,24 +72,20 @@ int main()
 	double curtAlphaP;
 	double virial;
 	double volume;
-	double temp;
-	double test=0;
-	double meanTemp, meanSquareTemp, meanTemp_ik[correlationDistance-1];
-	double meanPressure, meanSquarePressure, meanPressure_ik[correlationDistance-1];
-	double phiTemp[correlationDistance], phiPressure[correlationDistance], meanTempSquare, meanPressureSquare;
+	double nAverageSteps;
+	double meanTemp, meanSquareTemp, meanTemp_ik[maxCorrelationSteps-1];
+	double meanPressure, meanSquarePressure, meanPressure_ik[maxCorrelationSteps-1];
+	double phiTemp[maxCorrelationSteps], phiPressure[maxCorrelationSteps], meanTempSquare, meanPressureSquare;
 	double varTemp, varPressure;
 	double sTemp, sPressure;
 	double savedPos[msdStep][nParticles][dim];
 	double msd;
-	double savedVelocities[correlationDistance][nParticles][dim];
-	double meanVelocityScalar[correlationDistance][nParticles];
-	double meanVelocityAverage[correlationDistance];
+	double savedVelocities[maxCorrelationSteps][nParticles][dim];
+	double meanVelocityScalar[maxCorrelationSteps][nParticles];
+	double meanVelocityAverage[maxCorrelationSteps];
 	double spectrum[nSpectrumPoints];
 	double diffusionCoefficient;
 
-	// derived quantities
-	double nEquilibrationSteps = equilibrationTime/timestep;
-	double nProductionSteps = productionTime/timestep;
 
 	// other stuff
 	int i,j,k,m;   
@@ -214,22 +218,22 @@ int main()
 
 
 		//Saves temp and pressure values in order to calculate s.
-		if (i < correlationDistance) {
+		if (i < maxCorrelationSteps) {
 			savedValuesT[i] = currentTemp;
 			savedValuesP[i] = currentPressure;		
 		} else {  
 			// updates the saved values.
-			for (j = 0; j<correlationDistance - 1; j++){	
+			for (j = 0; j < maxCorrelationSteps - 1; j++){	
 				savedValuesT[j] = savedValuesT[j+1];
 				savedValuesP[j] = savedValuesP[j+1];	
 			}
-			savedValuesT[correlationDistance - 1] = currentTemp;
-			savedValuesP[correlationDistance - 1] = currentPressure;
+			savedValuesT[maxCorrelationSteps - 1] = currentTemp;
+			savedValuesP[maxCorrelationSteps - 1] = currentPressure;
 			
 			// calculates and saves f_i*f_k
-			for (j = 0; j<correlationDistance; j++){
-				meanTemp_ik[j] += savedValuesT[correlationDistance - 1] * savedValuesT[correlationDistance - 1 - j];
-				meanPressure_ik[j] += savedValuesP[correlationDistance - 1]* savedValuesP[correlationDistance - 1 - j];
+			for (j = 0; j<maxCorrelationSteps; j++){
+				meanTemp_ik[j] += savedValuesT[maxCorrelationSteps - 1] * savedValuesT[maxCorrelationSteps - 1 - j];
+				meanPressure_ik[j] += savedValuesP[maxCorrelationSteps - 1]* savedValuesP[maxCorrelationSteps - 1 - j];
 			}
 			meanTemp += currentTemp;
 			meanPressure += currentPressure;
@@ -238,14 +242,14 @@ int main()
 		}
 
 		// Saving data for the velocity correlation function
-		if (i < correlationDistance) {
+		if (i < maxCorrelationSteps) {
 			for (m = 0; m < nParticles ; m++) {
 				savedVelocities[i][m][0] = vel[m][0];
 				savedVelocities[i][m][1] = vel[m][1];
 				savedVelocities[i][m][2] = vel[m][2];
 			}
 		} else {
-			for (j = 0; j<correlationDistance - 1; j++) {
+			for (j = 0; j< maxCorrelationSteps- 1; j++) {
 				for (m = 0; m<nParticles;  m++) {
 					savedVelocities[j][m][0] = savedVelocities[j+1][m][0];
 					savedVelocities[j][m][1] = savedVelocities[j+1][m][1];
@@ -253,12 +257,12 @@ int main()
 				}
 			}
 			for (m = 0; m<nParticles; m++) {
-				savedVelocities[correlationDistance - 1][m][0] = vel[m][0];
-				savedVelocities[correlationDistance - 1][m][1] = vel[m][1];
-				savedVelocities[correlationDistance - 1][m][2] = vel[m][2];
+				savedVelocities[maxCorrelationSteps - 1][m][0] = vel[m][0];
+				savedVelocities[maxCorrelationSteps - 1][m][1] = vel[m][1];
+				savedVelocities[maxCorrelationSteps - 1][m][2] = vel[m][2];
 			}
 
-			for (j = 0; j<correlationDistance; j++) {
+			for (j = 0; j<maxCorrelationSteps; j++) {
 				for (m = 0; m < nParticles; m++) {
 					meanVelocityScalar[j][m] += ScalarProduct(savedVelocities[0][m],savedVelocities[j][m]);
 				}
@@ -286,11 +290,11 @@ int main()
 			}
 		}	
 		for(j = 0; j<nParticles; j++){
-			temp = 0.0;
+//			temp = 0.0;
 			for(k = 0; k<dim; k++){
-				temp += (pos[j][k] - savedPos[msdStep-1][j][k])*(pos[j][k] - savedPos[msdStep-1][j][k]); 
+//				temp += (pos[j][k] - savedPos[msdStep-1][j][k])*(pos[j][k] - savedPos[msdStep-1][j][k]); 
 			}
-			msd += temp;
+//			msd += temp;
 		}
 		if(i%100 == 0) {
 			printf("I");
@@ -300,23 +304,26 @@ int main()
 
 	printf("\tDone!\nStarting clean up\n");
 
+	// The production part of the simulation is now done.
+	// The code below forms some averages and other stuff that
+	// is best done with all data on hand
 
-	temp = nProductionSteps-correlationDistance;
+	nAverageSteps = nProductionSteps-maxCorrelationSteps;	// number of steps over which to take averages
 	
-	meanTemp = meanTemp/temp;
-	meanSquareTemp = meanSquareTemp/temp;
-	meanPressure = meanPressure/temp;
-	meanSquarePressure = meanSquarePressure/temp;
+	meanTemp = meanTemp/nAverageSteps;
+	meanSquareTemp = meanSquareTemp/nAverageSteps;
+	meanPressure = meanPressure/nAverageSteps;
+	meanSquarePressure = meanSquarePressure/nAverageSteps;
 //printf("test = %e \t calculated= %e \n", test, temp);
 
 	//The last step to calculate the mean values of meanTemp_ik & meanPressure_ik.
-	for(i = 0; i<correlationDistance+1; i++){
-		meanTemp_ik[i] = meanTemp_ik[i]/temp;
-		meanPressure_ik[i] = meanPressure_ik[i]/temp;
+	for(i = 0; i < maxCorrelationSteps+1; i++){
+		meanTemp_ik[i] = meanTemp_ik[i]/nAverageSteps;
+		meanPressure_ik[i] = meanPressure_ik[i]/nAverageSteps;
 //printf("ik_T = %e \t ik_P = %e \n", meanTemp_ik[i], meanPressure_ik[i]);
 	}
 	
-	msd = msd/temp;
+	msd = msd/nAverageSteps;
 	printf("msd= %e DETTA ÄR INTE KLART\n", msd);
 
 	// Final processing and saving of velocity correlation function
@@ -324,10 +331,10 @@ int main()
 	velcorFile = fopen("velcor.data","w");
 
 	diffusionCoefficient = 0;
-	for( i = 0; i < correlationDistance; i++) {
+	for( i = 0; i < maxCorrelationSteps; i++) {
 		meanVelocityAverage[i] = 0;
 		for (j = 0; j<nParticles; j++) {
-			meanVelocityScalar[i][j] = meanVelocityScalar[i][j]/temp;
+			meanVelocityScalar[i][j] = meanVelocityScalar[i][j]/nAverageSteps;
 			meanVelocityAverage[i] += meanVelocityScalar[i][j];
 		}
 		meanVelocityAverage[i] = meanVelocityAverage[i]/nParticles;
@@ -336,8 +343,8 @@ int main()
 		diffusionCoefficient += meanVelocityAverage[i];
 	}
 
-	diffusionCoefficient = (1.0/3.0) * diffusionCoefficient / (correlationDistance);
-	printf("diffCoeff = %e \n", diffusionCoefficient);
+	diffusionCoefficient = (1.0/3.0) * diffusionCoefficient / maxCorrelationSteps;
+//	printf("diffCoeff = %e \n", diffusionCoefficient);
 
 	// Calculating and saving spectrum integral thingy, finding diffusion coeff from time integral
 	FILE *spectrumFile;
@@ -345,10 +352,10 @@ int main()
 
 	for( i = 0; i < nSpectrumPoints; i++) {
 		spectrum[i] = 0;
-		for( j = 0; j<correlationDistance; j++) {
+		for( j = 0; j < maxCorrelationSteps; j++) {
 			spectrum[i] += meanVelocityAverage[j] * cos(spectrumInterval * i * j / nSpectrumPoints);
 		}
-		spectrum[i] = 2 * spectrum[i]/correlationDistance;
+		spectrum[i] = 2 * spectrum[i]/maxCorrelationSteps;
 		fprintf(spectrumFile,"%d \t %e \n",i,spectrum[i]);
 	}
 
@@ -362,7 +369,7 @@ int main()
 
 	FILE *phiPFile;
 	phiPFile = fopen("phiPressure.data","w");
-	for(i = 0; i<correlationDistance+1; i++){
+	for(i = 0; i<maxCorrelationSteps+1; i++){
 		phiTemp[i] = (meanTemp_ik[i] - meanTempSquare)/(meanSquareTemp - meanTempSquare);
 		phiPressure[i] = (meanPressure_ik[i] - meanPressureSquare)/(meanSquarePressure - meanPressureSquare);
  
@@ -371,19 +378,19 @@ int main()
 	}
 
 	// finds s automatic (so that we don't have to read it from a plot)
-	temp = exp(-2.0);
-	for(i = 0; i<correlationDistance; i++){
+	double limit = exp(-2.0);
+	for(i = 0; i < maxCorrelationSteps; i++){
 		sTemp  = i;
-		if( phiTemp[i] < temp){
-			i = correlationDistance;
+		if( phiTemp[i] < limit){
+			i = maxCorrelationSteps;
 		}
 	}
 
 
-	for(i = 0; i<correlationDistance; i++){
+	for(i = 0; i<maxCorrelationSteps; i++){
 		sPressure  = i+1;
-		if( phiPressure[i] < temp){
-			i = correlationDistance;
+		if( phiPressure[i] < limit){
+			i = maxCorrelationSteps;
 		}
 	}
 
