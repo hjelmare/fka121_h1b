@@ -1,12 +1,24 @@
 clear all
 clc
 
-data = importdata('energy.data');
+data = importdata('energyT1.data');
 
-time = data(:,1);
-energy = data(:,2);
-potentialEnergy = data(:,3);
-kineticEnergy = data(:,4);
+time1 = data(:,1);
+energy1 = data(:,2);
+potentialEnergy1 = data(:,3);
+kineticEnergy1 = data(:,4);
+
+data = importdata('energyT2.data');
+time2 = data(:,1);
+energy2 = data(:,2);
+potentialEnergy2 = data(:,3);
+kineticEnergy2 = data(:,4);
+
+data = importdata('energyT3.data');
+time3 = data(:,1);
+energy3 = data(:,2);
+potentialEnergy3 = data(:,3);
+kineticEnergy3 = data(:,4);
 
 data = importdata('pt.data');
 
@@ -15,10 +27,28 @@ pressure = data(:,3);
 
 %%
 hold on
-plot(time, energy, 'b');
-plot(time, potentialEnergy, 'g');
-plot(time, kineticEnergy, 'r');
-legend('total energy', 'potential energy', 'kinetic energy');
+subplot(3,1,1)
+plot(time1, energy1, 'b');
+plot(time2, energy2, 'g');
+plot(time3, energy3, 'r');
+legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
+title('Total energy')
+ylabel('energy [eV]');
+xlabel('time [ps]');
+subplot(3,1,2)
+plot(time1, potentialEnergy1, 'b');
+plot(time2, potentialEnergy2, 'g');
+plot(time3, potentialEnergy3, 'r');
+legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
+title('Potential energy');
+ylabel('energy [eV]');
+xlabel('time [ps]');
+subplot(3,1,3)
+plot(time1, kineticEnergy1, 'b');
+plot(time2, kineticEnergy2, 'g');
+plot(time3, kineticEnergy3, 'r');
+legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
+title('Kinetic energy');
 ylabel('energy [eV]');
 xlabel('time [ps]');
 %%

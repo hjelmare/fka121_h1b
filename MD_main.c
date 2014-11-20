@@ -23,6 +23,8 @@ int main()
 	double equilibrationTime = 5;
 	int msdStep = 10;	// vad är detta?	
 	double timestep = 0.01;
+//	timestep = 0.1;
+	timestep = 0.001;
 	int nSpectrumPoints = 1000;
 	double spectrumInterval = PI;
 			
@@ -112,7 +114,10 @@ int main()
 
 	//Saving initial data:
 	FILE *energyFile;
-	energyFile = fopen("energy.data","w");
+	//energyFile = fopen("energy.data","w");
+	//energyFile = fopen("energyT1.data","w");
+	//energyFile = fopen("energyT2.data","w");
+	energyFile = fopen("energyT3.data","w");
 	fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, potentialEnergy, kineticEnergy);
 
 	FILE *ptFile;
