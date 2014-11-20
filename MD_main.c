@@ -392,7 +392,7 @@ int main()
 		fprintf(phiPFile, "%e \t %e \n", (i+1)*timestep, phiPressure[i]);
 	}
 
-	// finds s automatic (so that we don't have to read it from a plot)
+	// Finding s (the longest time for which correlation is above some limit)
 	double limit = exp(-2.0);
 	for(i = 0; i < maxCorrelationSteps; i++){
 		sTemp  = i;
@@ -415,10 +415,6 @@ int main()
 
 	varTemp = varTemp*sTemp/nProductionSteps;
 	varPressure = varPressure*sPressure/nProductionSteps;
-
-//printf("The s parameters are: sTemp= %e \t sPressure= %e \nthe variation of the temperature is %e \t the variation of the pressure is %e \n",sTemp, sPressure, varTemp, varPressure);
-//printf("våra s-värden är inte så rimliga. Har vi för stort tidssteg? för liten equilibrationsteps? för få tidssteg?");
-		// Savesthevalues needed to calculate the statistical inefficiency (s), for T and P.
 	
 	FILE *valuesFile;
 	valuesFile = fopen("values.data","w");
