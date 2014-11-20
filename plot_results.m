@@ -58,3 +58,4 @@ data = importdata('spectrum.data');
 
 hold on
 plot(data(:,1),data(:,2),'b')
+

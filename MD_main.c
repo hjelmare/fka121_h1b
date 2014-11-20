@@ -23,13 +23,13 @@ int main()
 	int msdStep = 10;	
 	double timestep = 0.01;
 	double equilibrationTime = 5;
-	double nSpectrumPoints = 1000;
+	int nSpectrumPoints = 1000;
 	double spectrumInterval = PI;
 			
 	// physical parameters
 	int dim = 3;		// do not change. some functions are hardcoded for dim = 3.
 	int nCells = 4;
-	int correlationDistance = 150;	// this constant determines how separated the points should be in the corr.function (for temperature)
+	int correlationDistance = 150;	//this constant determines how separated the points should be in the corr.function (for temperature)
 	int nParticles = 4*pow(nCells,dim);
 	int equilibrationSteps = equilibrationTime/timestep;
 	double wantedTemp = 700+273;   // The temperature that we want the system to stabilize around.
@@ -73,6 +73,7 @@ int main()
 	double meanVelocityScalar[correlationDistance][nParticles];
 	double meanVelocityAverage[correlationDistance];
 	double spectrum[nSpectrumPoints];
+	double diffusionCoefficient;
 
 	// derived quantities
 	double nSteps = totalTime/timestep;
@@ -83,7 +84,7 @@ int main()
 	srand(time(NULL));
 	double random_value;
 
-
+	printf("Initializing");
 	init_fcc(pos, nCells, latticeParameter);
 
 	for(i = 0; i<nParticles; i++){
@@ -117,7 +118,7 @@ int main()
 	FILE *positionFile;
 	positionFile = fopen("position.data","w");
 
-	printf("Starting equilibration\n");
+	printf("\t\tDone!\nEquilibration\t");
 
 	for (i=1;i<equilibrationSteps;i++) {
 		// Update velocities and positions
@@ -163,9 +164,13 @@ int main()
 				pos[j][k] = pos[j][k] * curtAlphaP;
 			}
 		}
+		if(i%100 == 0) {
+			printf("I");
+			fflush(stdout);
+		}
 	}	// End of equilibration loop
 
-	printf("Equilibration finished, starting production\n");
+	printf("\tDone!\nProduction\t");
 
 	for (i=equilibrationSteps;i<nSteps;i++) {
 		//Save positions (to check wether a solid or liquid)
@@ -232,7 +237,7 @@ int main()
 				savedVelocities[i - equilibrationSteps][m][2] = vel[m][2];
 			}
 		} else {
-			for (j = 0; j<correlationDistance - 1 ; j++) {
+			for (j = 0; j<correlationDistance - 1; j++) {
 				for (m = 0; m<nParticles;  m++) {
 					savedVelocities[j][m][0] = savedVelocities[j+1][m][0];
 					savedVelocities[j][m][1] = savedVelocities[j+1][m][1];
@@ -240,14 +245,14 @@ int main()
 				}
 			}
 			for (m = 0; m<nParticles; m++) {
-				savedVelocities[correlationDistance-1][m][0] = vel[m][0];
-				savedVelocities[correlationDistance-1][m][1] = vel[m][1];
-				savedVelocities[correlationDistance-1][m][2] = vel[m][2];
+				savedVelocities[correlationDistance - 1][m][0] = vel[m][0];
+				savedVelocities[correlationDistance - 1][m][1] = vel[m][1];
+				savedVelocities[correlationDistance - 1][m][2] = vel[m][2];
 			}
 
-			for (j = 0; j<correlationDistance - 1; j++) {
+			for (j = 0; j<correlationDistance; j++) {
 				for (m = 0; m < nParticles; m++) {
-					meanVelocityScalar[j][m] += ScalarProduct(savedVelocities[0][m],savedVelocities[j+1][m]);
+					meanVelocityScalar[j][m] += ScalarProduct(savedVelocities[0][m],savedVelocities[j][m]);
 				}
 			}
 		}
@@ -279,9 +284,13 @@ int main()
 			}
 			msd += temp;
 		}
+		if(i%100 == 0) {
+			printf("I");
+			fflush(stdout);
+		}
 	}	// End of production loop
 
-	printf("Production finished, clean up starting\n");
+	printf("\tDone!\nStarting clean up\n");
 
 	meanTemp = meanTemp/(nSteps-equilibrationSteps);
 	meanSquareTemp = meanSquareTemp/(nSteps-equilibrationSteps);
@@ -296,12 +305,13 @@ int main()
 	}
 	
 	msd = msd/temp;
-	printf("msd= %e DETTA ÄR INTE KLART", msd);
+	printf("msd= %e DETTA ÄR INTE KLART\n", msd);
 
 	// Final processing and saving of velocity correlation function
 	FILE *velcorFile;
 	velcorFile = fopen("velcor.data","w");
 
+	diffusionCoefficient = 0;
 	for( i = 0; i < correlationDistance; i++) {
 		meanVelocityAverage[i] = 0;
 		for (j = 0; j<nParticles; j++) {
@@ -310,9 +320,14 @@ int main()
 		}
 		meanVelocityAverage[i] = meanVelocityAverage[i]/nParticles;
 		fprintf(velcorFile, "%d\t%e\n", i, meanVelocityAverage[i]);
+
+		diffusionCoefficient += meanVelocityAverage[i];
 	}
 
-	// Calculating and saving spectrum integral thingy - NEEDS CLEAN UP!!!
+	diffusionCoefficient = (1.0/3.0) * diffusionCoefficient / (correlationDistance);
+	printf("diffCoeff = %e \n", diffusionCoefficient);
+
+	// Calculating and saving spectrum integral thingy, finding diffusion coeff from time integral
 	FILE *spectrumFile;
 	spectrumFile = fopen("spectrum.data","w");
 
@@ -321,7 +336,7 @@ int main()
 		for( j = 0; j<correlationDistance; j++) {
 			spectrum[i] += meanVelocityAverage[j] * cos(spectrumInterval * i * j / nSpectrumPoints);
 		}
-		spectrum[i] = spectrum[i]/correlationDistance;
+		spectrum[i] = 2 * spectrum[i]/correlationDistance;
 		fprintf(spectrumFile,"%d \t %e \n",i,spectrum[i]);
 	}
 
@@ -370,10 +385,16 @@ int main()
 //printf("The s parameters are: sTemp= %e \t sPressure= %e \nthe variation of the temperature is %e \t the variation of the pressure is %e \n",sTemp, sPressure, varTemp, varPressure);
 //printf("våra s-värden är inte så rimliga. Har vi för stort tidssteg? för liten equilibrationsteps? för få tidssteg?");
 		// Savesthevalues needed to calculate the statistical inefficiency (s), for T and P.
-		
+	
+	FILE *valuesFile;
+	valuesFile = fopen("values.data","w");
+	fprintf(valuesFile,"Ds-int\n");
+	fprintf(valuesFile,"%e \t",diffusionCoefficient);
+	fprintf(valuesFile,"\n");
+	close(valuesFile);
 
-FILE *donefile;
-donefile = fopen("done.data", "w");
-fprintf(donefile, "done");
-close(donefile);
+	FILE *donefile;
+	donefile = fopen("done.data", "w");
+	fprintf(donefile, "done");
+	close(donefile);
 }
