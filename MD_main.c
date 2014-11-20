@@ -414,7 +414,7 @@ printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSq
 		fprintf(phiPFile, "%e \t %e \n", (i+1)*timestep, phiPressure[i]);
 	}
 
-	// finds M automatic (so that we don't have to read it from a plot)
+	// Finding M (the longest time for which correlation is above some limit)
 	double limit = exp(-2.0);
 	for(i = 0; i < maxCorrelationSteps; i++){
 		MTemp  = i;
@@ -450,10 +450,7 @@ printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSq
 
 	varTemp = varTemp*sTemp/nProductionSteps;
 	varPressure = varPressure*sPressure/nProductionSteps;
-
 printf("sTemp= %e \t sPressure= %e \nVAR[temp]= %e \t VAR[P]= %e \n",sTemp, sPressure, varTemp, varPressure);
-//printf("våra s-värden är inte så rimliga. Har vi för stort tidssteg? för liten equilibrationsteps? för få tidssteg?");
-		// Savesthevalues needed to calculate the statistical inefficiency (s), for T and P.
 	
 	FILE *valuesFile;
 	valuesFile = fopen("values.data","w");
