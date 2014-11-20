@@ -87,7 +87,8 @@ int main()
 	double meanVelocityAverage[maxCorrelationSteps];
 	double spectrum[nSpectrumPoints];
 	double diffusionCoefficient;
-
+	double meanDistanceScalar[maxCorrelationSteps][nParticles];
+	double meanDistanceAverage[maxCorrelationSteps];
 
 	// other stuff
 	int i,j,k,m;   
@@ -292,14 +293,14 @@ int main()
 			}
 		}
 
-		if(i <  msdStep) {
+		if(i <  maxCorrelationSteps) {
 			for(j = 0; j<nParticles; j++) {
 				for (k = 0; k<dim; k++) {
 					savedPos[i][j][k] = pos[j][k];
 				} 
 			}
 		} else {
-			for (j = 0; j<msdStep-1; j++) {
+			for (j = 0; j<maxCorrelationSteps-1; j++) {
 				for (k = 0; k<nParticles; k++) {
 					for (m = 0; m<dim; m++) {
 						savedPos[j][k][m] = savedPos[j+1][k][m];
@@ -308,17 +309,17 @@ int main()
 			}
 			for (j = 0; j<nParticles; j++) {
 				for (k=0; k<dim; k++) {
-					savedPos[msdStep-1][j][k] = pos[j][k];
+					savedPos[maxCorrelationSteps-1][j][k] = pos[j][k];
 				}
 			}
-		}	
-		for(j = 0; j<nParticles; j++){
-//			temp = 0.0;
-			for(k = 0; k<dim; k++){
-//				temp += (pos[j][k] - savedPos[msdStep-1][j][k])*(pos[j][k] - savedPos[msdStep-1][j][k]); 
-			}
-//			msd += temp;
 		}
+printf("a %e", i);	
+		for(j = 0; j<maxCorrelationSteps; j++){
+			for(k = 0; k<nParticles; k++){
+				meanDistanceScalar[j][k] += getDistanceSquared(savedPos[0][k], savedPos[j][k]); 
+			}
+		}
+printf("b\n");
 		if(i%100 == 0) {	// Progress indicator
 			printf("I");
 			fflush(stdout);
@@ -349,11 +350,25 @@ printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSq
 	msd = msd/nAverageSteps;
 	printf("msd= %e DETTA ÄR INTE KLART\n", msd);
 
+	FILE *msdFile;
+	msdFile = fopen("msd.data","w");
+
+	for( i = 0; i < maxCorrelationSteps; i++) {
+		meanDistanceAverage[i] = 0;
+		for (j = 0; j<nParticles; j++) {
+			meanDistanceScalar[i][j] = meanDistanceScalar[i][j]/nAverageSteps;
+			meanDistanceAverage[i] += meanDistanceScalar[i][j];
+		}
+		meanDistanceAverage[i] = meanDistanceAverage[i]/nParticles;
+		fprintf(msdFile, "%e\t%e\n", i*timestep, meanDistanceAverage[i]);
+	}
+
 	// Final processing and saving of velocity correlation function
 	FILE *velcorFile;
 	velcorFile = fopen("velcor.data","w");
 
 	diffusionCoefficient = 0;
+
 	for( i = 0; i < maxCorrelationSteps; i++) {
 		meanVelocityAverage[i] = 0;
 		for (j = 0; j<nParticles; j++) {
@@ -362,7 +377,7 @@ printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSq
 		}
 		meanVelocityAverage[i] = meanVelocityAverage[i]/nParticles;
 		fprintf(velcorFile, "%e\t%e\n", i*timestep, meanVelocityAverage[i]);
-
+		
 		diffusionCoefficient += meanVelocityAverage[i];
 	}
 

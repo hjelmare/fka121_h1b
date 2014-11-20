@@ -4,6 +4,21 @@
 
 #define BOLTZMANN 8.6173324*0.00001	// in eV/K
 
+
+double getDistanceSquared(double vec1[3], double vec2[3])
+{
+	double sum = 0;
+	double temporary;
+	int i;
+	
+
+	for(i = 0; i<3; i++){
+		temporary = vec1[i] - vec2[i];
+		sum += pow(2, temporary);
+	}
+	return sum;
+}
+
 double ScalarProduct(double vec1[3], double vec2[3])
 {
 	double product = 0;
