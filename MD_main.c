@@ -20,12 +20,11 @@ int main()
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
 	double productionTime = 5;
-	double equilibrationTime = 15;
+	double equilibrationTime = 5;
 	double timestep = 0.01;
 //	timestep = 0.1;
 //	timestep = 0.001;
-	
-	int msdStep = 10;	// vad är detta?	
+		
 	
 	int nSpectrumPoints = 1000;
 	double spectrumInterval = PI;
@@ -38,7 +37,7 @@ int main()
 	int nParticles = 4*pow(nCells,dim);
 	int MTemp, MPressure;    // The values at which the points of Temp and Pressure no longer are correlated.
 	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
-//	wantedTemp = 700+273;
+	wantedTemp = 700+273;
 //	wantedTemp = 900+273;
 	double wantedPressure =  6.32420934* 0.0000001;	// The pressure that we want the system to stabilize around.
 	double timeConstantT = 0.02;
@@ -80,7 +79,7 @@ int main()
 	double phiTemp[maxCorrelationSteps], phiPressure[maxCorrelationSteps], meanTempSquare, meanPressureSquare;
 	double varTemp, varPressure;
 	double sTemp, sPressure;
-	double savedPos[msdStep][nParticles][dim];
+	double savedPos[maxCorrelationSteps][nParticles][dim];
 	double msd;
 	double savedVelocities[maxCorrelationSteps][nParticles][dim];
 	double meanVelocityScalar[maxCorrelationSteps][nParticles];
@@ -299,7 +298,7 @@ int main()
 					savedPos[i][j][k] = pos[j][k];
 				} 
 			}
-		} else {
+		}else {
 			for (j = 0; j<maxCorrelationSteps-1; j++) {
 				for (k = 0; k<nParticles; k++) {
 					for (m = 0; m<dim; m++) {
@@ -312,18 +311,19 @@ int main()
 					savedPos[maxCorrelationSteps-1][j][k] = pos[j][k];
 				}
 			}
-		}
-printf("a %e", i);	
-		for(j = 0; j<maxCorrelationSteps; j++){
-			for(k = 0; k<nParticles; k++){
-				meanDistanceScalar[j][k] += getDistanceSquared(savedPos[0][k], savedPos[j][k]); 
+			for(j = 0; j<maxCorrelationSteps; j++){
+				for(k = 0; k<nParticles; k++){
+					meanDistanceScalar[j][k] += getDistanceSquared(savedPos[0][k], savedPos[j][k]); 
+				}
 			}
-		}
-printf("b\n");
+		} 
+
+
 		if(i%100 == 0) {	// Progress indicator
 			printf("I");
 			fflush(stdout);
 		}
+
 	}	// End of production loop
 
 	printf("\tDone!\nCleaning up\n");
@@ -351,7 +351,7 @@ printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSq
 	printf("msd= %e DETTA ÄR INTE KLART\n", msd);
 
 	FILE *msdFile;
-	msdFile = fopen("msd.data","w");
+	msdFile = fopen("msd3.data","w");
 
 	for( i = 0; i < maxCorrelationSteps; i++) {
 		meanDistanceAverage[i] = 0;

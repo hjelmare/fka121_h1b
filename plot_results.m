@@ -136,7 +136,28 @@ xlabel('\omega [rad]')
 
 saveas(gcf,'spectrum.png','png')
 
-%% nothing here to see
+%% MSD function
 
+clear all
+clc
+clf
+
+data = importdata('msd.data');
+data2 = importdata('msd2.data');
+data3 = importdata('msd3.data');
+
+hold on
+plot(data(:,1),data(:,2), 'b');
+plot(data3(:,1),data3(:,2),'g.');
+plot(data2(:,1),data2(:,2),'r--');
+
+
+
+ylabel('MSD ')
+xlabel('\Delta t [ps]')
+legend('T=773K', 'T=973', 'T=1173K')
+
+
+saveas(gcf,'MSD.png','png')
 
 

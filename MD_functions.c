@@ -14,7 +14,7 @@ double getDistanceSquared(double vec1[3], double vec2[3])
 
 	for(i = 0; i<3; i++){
 		temporary = vec1[i] - vec2[i];
-		sum += pow(2, temporary);
+		sum += pow(temporary,2);
 	}
 	return sum;
 }
