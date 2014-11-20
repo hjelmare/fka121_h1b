@@ -23,7 +23,8 @@ int main()
 	int msdStep = 10;	
 	double timestep = 0.01;
 	double equilibrationTime = 5;
-	
+	double nSpectrumPoints = 1000;
+	double spectrumInterval = PI;
 			
 	// physical parameters
 	int dim = 3;		// do not change. some functions are hardcoded for dim = 3.
@@ -71,6 +72,7 @@ int main()
 	double savedVelocities[correlationDistance][nParticles][dim];
 	double meanVelocityScalar[correlationDistance][nParticles];
 	double meanVelocityAverage[correlationDistance];
+	double spectrum[nSpectrumPoints];
 
 	// derived quantities
 	double nSteps = totalTime/timestep;
@@ -313,16 +315,14 @@ int main()
 	// Calculating and saving spectrum integral thingy - NEEDS CLEAN UP!!!
 	FILE *spectrumFile;
 	spectrumFile = fopen("spectrum.data","w");
-	
-	double spectrum[1000];
 
-	for( i = 0; i < 1000; i++) {
+	for( i = 0; i < nSpectrumPoints; i++) {
 		spectrum[i] = 0;
 		for( j = 0; j<correlationDistance; j++) {
-			spectrum[i] += meanVelocityAverage[j]*cos(2*PI*i*j/1000);
+			spectrum[i] += meanVelocityAverage[j] * cos(spectrumInterval * i * j / nSpectrumPoints);
 		}
 		spectrum[i] = spectrum[i]/correlationDistance;
-		fprintf(spectrumFile,"%d\t%e\n",i,spectrum[i]);
+		fprintf(spectrumFile,"%d \t %e \n",i,spectrum[i]);
 	}
 
 	//Calculates phi
