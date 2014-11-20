@@ -19,10 +19,10 @@ int main()
 {
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
-	double totalTime = 10;
-	int msdStep = 10;	
-	double timestep = 0.01;
+	double productionTime = 5;
 	double equilibrationTime = 5;
+	int msdStep = 10;	// vad är detta?	
+	double timestep = 0.01;
 	int nSpectrumPoints = 1000;
 	double spectrumInterval = PI;
 			
@@ -78,7 +78,8 @@ int main()
 	double diffusionCoefficient;
 
 	// derived quantities
-	double nSteps = totalTime/timestep;
+	double nEquilibrationSteps = equilibrationTime/timestep;
+	double nProductionSteps = productionTime/timestep;
 
 	// other stuff
 	int i,j,k,m;   
@@ -120,6 +121,7 @@ int main()
 	FILE *positionFile;
 	positionFile = fopen("position.data","w");
 
+// Initialization is done, moving on to equilibration
 	printf("\t\tDone!\nEquilibration\t");
 
 	for (i=1;i<equilibrationSteps;i++) {
@@ -174,9 +176,9 @@ int main()
 
 	printf("\tDone!\nProduction\t");
 
-	for (i=equilibrationSteps;i<nSteps;i++) {
+	for (i=0;i<nProductionSteps;i++) {
 		//Save positions (to check wether a solid or liquid)
-		fprintf(positionFile, "%d \t %e \t %e \t %e \n", i-equilibrationSteps, pos[1][1], pos[1][2], pos[1][3]); //OBS Sparar bara x-coord, bör räcka för att kontrollera om vätska elelr solid.
+		fprintf(positionFile, "%d \t %e \t %e \t %e \n", i, pos[1][1], pos[1][2], pos[1][3]); //OBS Sparar bara x-coord, bör räcka för att kontrollera om vätska elelr solid.
 
 		// Update velocities and positions
 		for (j=0; j<nParticles; j++) {
@@ -207,11 +209,10 @@ int main()
 
 
 		//Saves temp and pressure values in order to calculate s.
-		if (i < equilibrationSteps + correlationDistance) {
-			savedValuesT[i - equilibrationSteps] = currentTemp;
-			savedValuesP[i - equilibrationSteps] = currentPressure;		
+		if (i < correlationDistance) {
+			savedValuesT[i] = currentTemp;
+			savedValuesP[i] = currentPressure;		
 		} else {  
-test += 1;
 			// updates the saved values.
 			for (j = 0; j<correlationDistance - 1; j++){	
 				savedValuesT[j] = savedValuesT[j+1];
@@ -230,14 +231,13 @@ test += 1;
 			meanSquareTemp += currentTemp * currentTemp;
 			meanSquarePressure += currentPressure * currentPressure;
 		}
-//printf("vektor = %e \t %e \t %e \t %e \t %e, \tcurrent = %e \n",savedValuesT[0],savedValuesT[1],savedValuesT[2],savedValuesT[3],savedValuesT[4], currentTemp);
 
-		// Initial attempt at getting the velocity correlation function.... NOT WORKING CORRECTLY?(?)
-		if (i < equilibrationSteps + correlationDistance) {
+		// Saving data for the velocity correlation function
+		if (i < correlationDistance) {
 			for (m = 0; m < nParticles ; m++) {
-				savedVelocities[i - equilibrationSteps][m][0] = vel[m][0];
-				savedVelocities[i - equilibrationSteps][m][1] = vel[m][1];
-				savedVelocities[i - equilibrationSteps][m][2] = vel[m][2];
+				savedVelocities[i][m][0] = vel[m][0];
+				savedVelocities[i][m][1] = vel[m][1];
+				savedVelocities[i][m][2] = vel[m][2];
 			}
 		} else {
 			for (j = 0; j<correlationDistance - 1; j++) {
@@ -260,10 +260,10 @@ test += 1;
 			}
 		}
 
-		if(i <  equilibrationSteps + msdStep) {
+		if(i <  msdStep) {
 			for(j = 0; j<nParticles; j++) {
 				for (k = 0; k<dim; k++) {
-					savedPos[i % msdStep][j][k] = pos[j][k];
+					savedPos[i][j][k] = pos[j][k];
 				} 
 			}
 		} else {
@@ -296,7 +296,7 @@ test += 1;
 	printf("\tDone!\nStarting clean up\n");
 
 
-	temp = nSteps-correlationDistance-equilibrationSteps;
+	temp = nProductionSteps-correlationDistance;
 	
 	meanTemp = meanTemp/temp;
 	meanSquareTemp = meanSquareTemp/temp;
@@ -386,8 +386,8 @@ test += 1;
 	varTemp = meanSquareTemp - meanTempSquare;
 	varPressure = meanSquarePressure - meanPressureSquare;
 
-	varTemp = varTemp*sTemp/(nSteps - equilibrationSteps);
-	varPressure = varPressure*sPressure/(nSteps - equilibrationSteps);
+	varTemp = varTemp*sTemp/nProductionSteps;
+	varPressure = varPressure*sPressure/nProductionSteps;
 
 //printf("The s parameters are: sTemp= %e \t sPressure= %e \nthe variation of the temperature is %e \t the variation of the pressure is %e \n",sTemp, sPressure, varTemp, varPressure);
 //printf("våra s-värden är inte så rimliga. Har vi för stort tidssteg? för liten equilibrationsteps? för få tidssteg?");
