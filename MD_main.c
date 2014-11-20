@@ -31,7 +31,7 @@ int main()
 	double spectrumInterval = PI;
 	
 	double maxCorrelationTime = 1;
-			
+	
 	// physical parameters
 	int dim = 3;		// do not change. some functions are hardcoded for dim = 3.
 	int nCells = 4;
@@ -95,9 +95,12 @@ int main()
 	srand(time(NULL));
 	double random_value;
 
+	// End of variable declarations, start of actual code
+
 	printf("Initializing");
 	init_fcc(pos, nCells, latticeParameter);
 
+	// applying random perturbations from strict fcc positions
 	for(i = 0; i<nParticles; i++){
 		for (j = 0; j<3; j++){
 			random_value = (double) rand() / (double) RAND_MAX;
@@ -113,12 +116,13 @@ int main()
 		}
 	}
 	
+	// calculating initial energies
 	potentialEnergy = get_energy_AL(pos, nCells*latticeParameter, nParticles);
 	kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 	energy = potentialEnergy + kineticEnergy;
 
 
-	//Saving initial data:
+	// saving initial energies on the first line in the file
 	FILE *energyFile;
 	energyFile = fopen("energy.data","w");
 	//energyFile = fopen("energyT1.data","w");
@@ -137,9 +141,14 @@ int main()
 
 
 // Initialization is done, moving on to equilibration
-	printf("\t\tDone!\nEquilibration\t");
 
-	for (i=1;i<equilibrationSteps;i++) {
+	printf("\t");	// Progress indicator stuff
+	for (i = 0; i < equilibrationSteps/100; i++) {
+		printf(".");
+	}
+	printf("\tDone!\nEquilibration\t");
+
+	for (i=0;i<nEquilibrationSteps;i++) {		// Start of equilibration loop
 		// Update velocities and positions
 		for (j=0; j<nParticles; j++) {
 			for (k = 0; k<dim; k++) {
@@ -158,24 +167,26 @@ int main()
 			}
 		}
 
+		// Calculating energies
 		potentialEnergy = get_energy_AL(pos, nCells*latticeParameter, nParticles);
 		kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 		energy = potentialEnergy + kineticEnergy;
-		fprintf(energyFile,"%e \t %e \t %e \t %e \n", i*timestep, energy, potentialEnergy, kineticEnergy);		
+		fprintf(energyFile,"%e \t %e \t %e \t %e \n", (i+1)*timestep, energy, potentialEnergy, kineticEnergy);		
 
+		// Get temperature and pressure
 		currentTemp = GetInstantTemperature(vel, nParticles, mass, dim);
 		volume = pow(nCells*latticeParameter, 3);
 		virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
 		currentPressure = GetPressure(currentTemp, volume, virial, nParticles);
-		fprintf(ptFile, "%e \t %e \t %e \n", i*timestep, currentTemp, currentPressure);
+		fprintf(ptFile, "%e \t %e \t %e \n", (i+1)*timestep, currentTemp, currentPressure);
 
-		//Calculate alpha (the velocity and position scaling parameters)
+		// Calculate scaling parameters for equilibration
 		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstantT);
 		alphaP = GetAlphaP(wantedPressure, currentPressure, timestep, timeConstantP);
 		sqrtAlphaT = sqrt(alphaT);
 		curtAlphaP = pow(alphaP, 1.0 / 3);
 
-		// Rescale velocity and position (and the size of the bounding volume, right?)
+		// Rescale velocity and position
 		latticeParameter = latticeParameter * curtAlphaP;
 		for (j=0; j<nParticles; j++) {
 			for (k=0; k<dim; k++) {
@@ -183,17 +194,20 @@ int main()
 				pos[j][k] = pos[j][k] * curtAlphaP;
 			}
 		}
-		if(i%100 == 0) {
+		if( i % 100 == 0) { 	// Progress indicator
 			printf("I");
 			fflush(stdout);
 		}
 	}	// End of equilibration loop
 
 	printf("\tDone!\nProduction\t");
-
+// DEBUGGING STUFF
+		FILE *pt2File;
+		pt2File = fopen("pt2.data","w");
+// ---------
 	for (i=0;i<nProductionSteps;i++) {
-		//Save positions (to check wether a solid or liquid)
-		fprintf(positionFile, "%d \t %e \t %e \t %e \n", i, pos[1][1], pos[1][2], pos[1][3]); //OBS Sparar bara x-coord, bör räcka för att kontrollera om vätska elelr solid.
+		//Save positions of one particle to check whether the aluminium is solid or liquid
+		fprintf(positionFile, "%d \t %e \t %e \t %e \n", i, pos[0][0], pos[0][1], pos[0][2]);
 
 		// Update velocities and positions
 		for (j=0; j<nParticles; j++) {
@@ -222,6 +236,7 @@ int main()
 		virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
 		currentPressure = GetPressure(currentTemp, volume, virial, nParticles);
 
+		fprintf(pt2File, "%d\t%e\t%e\n", i, currentPressure, currentTemp);
 
 		//Saves temp and pressure values in order to calculate s.
 		if (i < maxCorrelationSteps) {
@@ -304,13 +319,13 @@ int main()
 			}
 //			msd += temp;
 		}
-		if(i%100 == 0) {
+		if(i%100 == 0) {	// Progress indicator
 			printf("I");
 			fflush(stdout);
 		}
 	}	// End of production loop
 
-	printf("\tDone!\nStarting clean up\n");
+	printf("\tDone!\nCleaning up\n");
 
 	// The production part of the simulation is now done.
 	// The code below forms some averages and other stuff that
@@ -346,7 +361,7 @@ printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSq
 			meanVelocityAverage[i] += meanVelocityScalar[i][j];
 		}
 		meanVelocityAverage[i] = meanVelocityAverage[i]/nParticles;
-		fprintf(velcorFile, "%d\t%e\n", i, meanVelocityAverage[i]);
+		fprintf(velcorFile, "%e\t%e\n", i*timestep, meanVelocityAverage[i]);
 
 		diffusionCoefficient += meanVelocityAverage[i];
 	}
@@ -364,7 +379,7 @@ printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSq
 			spectrum[i] += meanVelocityAverage[j] * cos(spectrumInterval * i * j / nSpectrumPoints);
 		}
 		spectrum[i] = 2 * spectrum[i]/maxCorrelationSteps;
-		fprintf(spectrumFile,"%d \t %e \n",i,spectrum[i]);
+		fprintf(spectrumFile,"%e \t %e \n",i*spectrumInterval/nSpectrumPoints,spectrum[i]);
 	}
 
 	//Calculates phi
@@ -436,4 +451,7 @@ printf("sTemp= %e \t sPressure= %e \nVAR[temp]= %e \t VAR[P]= %e \n",sTemp, sPre
 	donefile = fopen("done.data", "w");
 	fprintf(donefile, "done");
 	close(donefile);
+
+	printf("Done!\n");
+	return 0;
 }

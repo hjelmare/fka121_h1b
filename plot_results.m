@@ -95,3 +95,48 @@ data = importdata('spectrum.data');
 hold on
 plot(data(:,1),data(:,2),'b')
 
+%%
+
+clear all
+clc
+clf
+
+data = importdata('pt2.data');
+
+hold on
+plot(data(:,1),data(:,2),'r')
+plot(data(:,1),data(:,3),'b')
+hold off
+
+%% Velocity correlation function
+
+clear all
+clc
+clf
+
+data = importdata('velcor.data');
+plot(data(:,1),data(:,2));
+
+ylabel('Velocity correlation [(Å/ps^2)^2]')
+xlabel('\Delta t [ps]')
+
+saveas(gcf,'velcor.png','png')
+
+%% Spectrum analysis
+
+clear all
+clc
+clf
+
+data = importdata('spectrum.data');
+plot(data(:,1),data(:,2));
+
+ylabel('Spectrum of velocity correlation function [(Å/ps^2)^2]')
+xlabel('\omega [rad]')
+
+saveas(gcf,'spectrum.png','png')
+
+%% nothing here to see
+
+
+
