@@ -25,13 +25,17 @@ xlabel('time (ps)');
 hold on
 subplot(2,1,1);
 plot(data(:,1), pressure, 'g');
+legend('Pressure');
+ylabel('Pressure [ENHET?]');
+xlabel('time [ps]');
+
 hold on
+
 subplot(2,1,2);
 plot(data(:,1), temp, 'm');
-
-legend('pressure', 'temp');
-ylabel('energy [eV]');
-xlabel('time (ps)');
+legend('Temperature');
+ylabel('energy [K]');
+xlabel('time [ps]');
 
 useFrom = 0.6;
 start = fix(length(energy)*useFrom);

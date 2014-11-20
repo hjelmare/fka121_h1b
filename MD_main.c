@@ -204,16 +204,12 @@ int main()
 		currentPressure = GetPressure(currentTemp, volume, virial, nParticles);
 
 
-		meanTemp += currentTemp;
-		meanPressure += currentPressure;
-		meanSquareTemp += currentTemp * currentTemp;
-		meanSquarePressure += currentPressure * currentPressure;
 		//Saves temp and pressure values in order to calculate s.
 		if (i < equilibrationSteps + correlationDistance) {
 			savedValuesT[i - equilibrationSteps] = currentTemp;
 			savedValuesP[i - equilibrationSteps] = currentPressure;		
 		} else {  
-			test += 1;
+test += 1;
 			// updates the saved values.
 			for (j = 0; j<correlationDistance - 1; j++){	
 				savedValuesT[j] = savedValuesT[j+1];
@@ -223,11 +219,16 @@ int main()
 			savedValuesP[correlationDistance - 1] = currentPressure;
 			
 			// calculates and saves f_i*f_k
-			for (j = 1; j<correlationDistance; j++){
-				meanTemp_ik[j-1] += savedValuesT[0] * savedValuesT[j];
-				meanPressure_ik[j-1] += savedValuesP[0]* savedValuesP[j];
+			for (j = 0; j<correlationDistance; j++){
+				meanTemp_ik[j] += savedValuesT[correlationDistance - 1] * savedValuesT[correlationDistance - 1 - j];
+				meanPressure_ik[j] += savedValuesP[correlationDistance - 1]* savedValuesP[correlationDistance - 1 - j];
 			}
+			meanTemp += currentTemp;
+			meanPressure += currentPressure;
+			meanSquareTemp += currentTemp * currentTemp;
+			meanSquarePressure += currentPressure * currentPressure;
 		}
+//printf("vektor = %e \t %e \t %e \t %e \t %e, \tcurrent = %e \n",savedValuesT[0],savedValuesT[1],savedValuesT[2],savedValuesT[3],savedValuesT[4], currentTemp);
 
 		// Initial attempt at getting the velocity correlation function.... NOT WORKING CORRECTLY?(?)
 		if (i < equilibrationSteps + correlationDistance) {
@@ -292,16 +293,20 @@ int main()
 
 	printf("\tDone!\nStarting clean up\n");
 
-	meanTemp = meanTemp/(nSteps-equilibrationSteps);
-	meanSquareTemp = meanSquareTemp/(nSteps-equilibrationSteps);
-	meanPressure = meanPressure/(nSteps-equilibrationSteps);
-	meanSquarePressure = meanSquarePressure/(nSteps-equilibrationSteps);
 
 	temp = nSteps-correlationDistance-equilibrationSteps;
+	
+	meanTemp = meanTemp/temp;
+	meanSquareTemp = meanSquareTemp/temp;
+	meanPressure = meanPressure/temp;
+	meanSquarePressure = meanSquarePressure/temp;
+//printf("test = %e \t calculated= %e \n", test, temp);
+
 	//The last step to calculate the mean values of meanTemp_ik & meanPressure_ik.
-	for(i = 0; i<correlationDistance; i++){
+	for(i = 0; i<correlationDistance+1; i++){
 		meanTemp_ik[i] = meanTemp_ik[i]/temp;
 		meanPressure_ik[i] = meanPressure_ik[i]/temp;
+//printf("ik_T = %e \t ik_P = %e \n", meanTemp_ik[i], meanPressure_ik[i]);
 	}
 	
 	msd = msd/temp;
@@ -350,18 +355,18 @@ int main()
 
 	FILE *phiPFile;
 	phiPFile = fopen("phiPressure.data","w");
-	for(i = 0; i<correlationDistance; i++){
+	for(i = 0; i<correlationDistance+1; i++){
 		phiTemp[i] = (meanTemp_ik[i] - meanTempSquare)/(meanSquareTemp - meanTempSquare);
 		phiPressure[i] = (meanPressure_ik[i] - meanPressureSquare)/(meanSquarePressure - meanPressureSquare);
  
-		fprintf(phiTempFile, "%d \t %e \n", i+1, phiTemp[i]); //Dessa behövs inte. De används bara för att kolla i matlab att vi får något vettigt!!!
-		fprintf(phiPFile, "%d \t %e \n", i+1, phiPressure[i]);
+		fprintf(phiTempFile, "%e \t %e \n", (i+1)*timestep, phiTemp[i]); //Dessa behövs inte. De används bara för att kolla i matlab att vi får något vettigt!!!
+		fprintf(phiPFile, "%e \t %e \n", (i+1)*timestep, phiPressure[i]);
 	}
 
 	// finds s automatic (so that we don't have to read it from a plot)
 	temp = exp(-2.0);
 	for(i = 0; i<correlationDistance; i++){
-		sTemp  = i+1;
+		sTemp  = i;
 		if( phiTemp[i] < temp){
 			i = correlationDistance;
 		}
