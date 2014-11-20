@@ -41,3 +41,13 @@ clf
 data = importdata('velcor.data');
 
 plot(data(:,1),data(:,2))
+
+%%
+
+clear all
+clc
+
+data = importdata('spectrum.data');
+
+hold on
+plot(data(:,1),data(:,2),'b')
