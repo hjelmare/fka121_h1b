@@ -32,7 +32,9 @@ int main()
 	int correlationDistance = 150;	//this constant determines how separated the points should be in the corr.function (for temperature)
 	int nParticles = 4*pow(nCells,dim);
 	int equilibrationSteps = equilibrationTime/timestep;
-	double wantedTemp = 700+273;   // The temperature that we want the system to stabilize around.
+	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
+//	wantedTemp = 700+273;
+//	wantedTemp = 900+273;
 	double wantedPressure = 6.32420934 * 0.0000001;	// The pressure that we want the system to stabilize around.
 	double timeConstantT = 0.02;
 	double timeConstantP = 0.05;

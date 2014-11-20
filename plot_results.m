@@ -20,19 +20,19 @@ plot(time, potentialEnergy, 'g');
 plot(time, kineticEnergy, 'r');
 legend('total energy', 'potential energy', 'kinetic energy');
 ylabel('energy [eV]');
-xlabel('time (ps)');
+xlabel('time [ps]');
 %%
 hold on
 subplot(2,1,1);
 plot(data(:,1), pressure, 'g');
 legend('Pressure');
-ylabel('Pressure [ENHET?]');
+ylabel('Pressure [eV/Å^{3}]');
 xlabel('time [ps]');
 
 hold on
 
 subplot(2,1,2);
-plot(data(:,1), temp, 'm');
+plot(data(:,1), temp, 'b');
 legend('Temperature');
 ylabel('energy [K]');
 xlabel('time [ps]');
