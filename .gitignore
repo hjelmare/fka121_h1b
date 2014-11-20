@@ -12,3 +12,6 @@ MD
 # Temp files
 *~
 *.swp
+
+# Graphics files
+*.png

@@ -353,7 +353,7 @@ int main()
 			meanVelocityAverage[i] += meanVelocityScalar[i][j];
 		}
 		meanVelocityAverage[i] = meanVelocityAverage[i]/nParticles;
-		fprintf(velcorFile, "%d\t%e\n", i, meanVelocityAverage[i]);
+		fprintf(velcorFile, "%e\t%e\n", i*timestep, meanVelocityAverage[i]);
 
 		diffusionCoefficient += meanVelocityAverage[i];
 	}
@@ -371,7 +371,7 @@ int main()
 			spectrum[i] += meanVelocityAverage[j] * cos(spectrumInterval * i * j / nSpectrumPoints);
 		}
 		spectrum[i] = 2 * spectrum[i]/maxCorrelationSteps;
-		fprintf(spectrumFile,"%d \t %e \n",i,spectrum[i]);
+		fprintf(spectrumFile,"%e \t %e \n",i*spectrumInterval/nSpectrumPoints,spectrum[i]);
 	}
 
 	//Calculates phi
