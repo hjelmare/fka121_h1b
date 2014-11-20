@@ -34,7 +34,9 @@ int main()
 	int dim = 3;		// do not change. some functions are hardcoded for dim = 3.
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
-	double wantedTemp = 700+273;   // The temperature that we want the system to stabilize around.
+	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
+//	wantedTemp = 700+273;
+//	wantedTemp = 900+273;
 	double wantedPressure = 6.32420934 * 0.0000001;	// The pressure that we want the system to stabilize around.
 	double timeConstantT = 0.02;
 	double timeConstantP = 0.05;
