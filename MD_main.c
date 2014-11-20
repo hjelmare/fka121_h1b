@@ -20,7 +20,7 @@ int main()
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
 	double productionTime = 5;
-	double equilibrationTime = 5;
+	double equilibrationTime = 15;
 	double timestep = 0.01;
 //	timestep = 0.1;
 //	timestep = 0.001;
@@ -36,10 +36,11 @@ int main()
 	int dim = 3;		// do not change. some functions are hardcoded for dim = 3.
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
+	int MTemp, MPressure;    // The values at which the points of Temp and Pressure no longer are correlated.
 	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
 //	wantedTemp = 700+273;
 //	wantedTemp = 900+273;
-	double wantedPressure = 6.32420934 * 0.0000001;	// The pressure that we want the system to stabilize around.
+	double wantedPressure =  6.32420934* 0.0000001;	// The pressure that we want the system to stabilize around.
 	double timeConstantT = 0.02;
 	double timeConstantP = 0.05;
 	//double timeConstantT = 1;
@@ -53,6 +54,7 @@ int main()
 	double nProductionSteps = productionTime/timestep;
 	int equilibrationSteps = equilibrationTime/timestep;
 	int maxCorrelationSteps = maxCorrelationTime/timestep;
+
 
 	// storage of physical quantities
 	double pos[nParticles][dim];
@@ -85,7 +87,8 @@ int main()
 	double meanVelocityAverage[maxCorrelationSteps];
 	double spectrum[nSpectrumPoints];
 	double diffusionCoefficient;
-
+	double meanDistanceScalar[maxCorrelationSteps][nParticles];
+	double meanDistanceAverage[maxCorrelationSteps];
 
 	// other stuff
 	int i,j,k,m;   
@@ -122,10 +125,10 @@ int main()
 
 	// saving initial energies on the first line in the file
 	FILE *energyFile;
-	//energyFile = fopen("energy.data","w");
+	energyFile = fopen("energy.data","w");
 	//energyFile = fopen("energyT1.data","w");
 	//energyFile = fopen("energyT2.data","w");
-	energyFile = fopen("energyT3.data","w");
+	//energyFile = fopen("energyT3.data","w");
 	fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, potentialEnergy, kineticEnergy);
 
 	FILE *ptFile;
@@ -133,6 +136,10 @@ int main()
 
 	FILE *positionFile;
 	positionFile = fopen("position.data","w");
+//	positionFile = fopen("position1.data","w");
+//	positionFile = fopen("position2.data","w");
+//	positionFile = fopen("position3.data","w");
+
 
 // Initialization is done, moving on to equilibration
 
@@ -249,7 +256,9 @@ int main()
 			for (j = 0; j<maxCorrelationSteps; j++){
 				meanTemp_ik[j] += savedValuesT[maxCorrelationSteps - 1] * savedValuesT[maxCorrelationSteps - 1 - j];
 				meanPressure_ik[j] += savedValuesP[maxCorrelationSteps - 1]* savedValuesP[maxCorrelationSteps - 1 - j];
+			//	printf("%e \t",meanTemp_ik[j]);
 			}
+			//printf("\n");
 			meanTemp += currentTemp;
 			meanPressure += currentPressure;
 			meanSquareTemp += currentTemp * currentTemp;
@@ -284,14 +293,14 @@ int main()
 			}
 		}
 
-		if(i <  msdStep) {
+		if(i <  maxCorrelationSteps) {
 			for(j = 0; j<nParticles; j++) {
 				for (k = 0; k<dim; k++) {
 					savedPos[i][j][k] = pos[j][k];
 				} 
 			}
 		} else {
-			for (j = 0; j<msdStep-1; j++) {
+			for (j = 0; j<maxCorrelationSteps-1; j++) {
 				for (k = 0; k<nParticles; k++) {
 					for (m = 0; m<dim; m++) {
 						savedPos[j][k][m] = savedPos[j+1][k][m];
@@ -300,17 +309,17 @@ int main()
 			}
 			for (j = 0; j<nParticles; j++) {
 				for (k=0; k<dim; k++) {
-					savedPos[msdStep-1][j][k] = pos[j][k];
+					savedPos[maxCorrelationSteps-1][j][k] = pos[j][k];
 				}
 			}
-		}	
-		for(j = 0; j<nParticles; j++){
-//			temp = 0.0;
-			for(k = 0; k<dim; k++){
-//				temp += (pos[j][k] - savedPos[msdStep-1][j][k])*(pos[j][k] - savedPos[msdStep-1][j][k]); 
-			}
-//			msd += temp;
 		}
+printf("a %e", i);	
+		for(j = 0; j<maxCorrelationSteps; j++){
+			for(k = 0; k<nParticles; k++){
+				meanDistanceScalar[j][k] += getDistanceSquared(savedPos[0][k], savedPos[j][k]); 
+			}
+		}
+printf("b\n");
 		if(i%100 == 0) {	// Progress indicator
 			printf("I");
 			fflush(stdout);
@@ -329,23 +338,37 @@ int main()
 	meanSquareTemp = meanSquareTemp/nAverageSteps;
 	meanPressure = meanPressure/nAverageSteps;
 	meanSquarePressure = meanSquarePressure/nAverageSteps;
+printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSquarePressure);
 //printf("test = %e \t calculated= %e \n", test, temp);
 
 	//The last step to calculate the mean values of meanTemp_ik & meanPressure_ik.
 	for(i = 0; i < maxCorrelationSteps+1; i++){
 		meanTemp_ik[i] = meanTemp_ik[i]/nAverageSteps;
 		meanPressure_ik[i] = meanPressure_ik[i]/nAverageSteps;
-//printf("ik_T = %e \t ik_P = %e \n", meanTemp_ik[i], meanPressure_ik[i]);
 	}
 	
 	msd = msd/nAverageSteps;
 	printf("msd= %e DETTA ÄR INTE KLART\n", msd);
+
+	FILE *msdFile;
+	msdFile = fopen("msd.data","w");
+
+	for( i = 0; i < maxCorrelationSteps; i++) {
+		meanDistanceAverage[i] = 0;
+		for (j = 0; j<nParticles; j++) {
+			meanDistanceScalar[i][j] = meanDistanceScalar[i][j]/nAverageSteps;
+			meanDistanceAverage[i] += meanDistanceScalar[i][j];
+		}
+		meanDistanceAverage[i] = meanDistanceAverage[i]/nParticles;
+		fprintf(msdFile, "%e\t%e\n", i*timestep, meanDistanceAverage[i]);
+	}
 
 	// Final processing and saving of velocity correlation function
 	FILE *velcorFile;
 	velcorFile = fopen("velcor.data","w");
 
 	diffusionCoefficient = 0;
+
 	for( i = 0; i < maxCorrelationSteps; i++) {
 		meanVelocityAverage[i] = 0;
 		for (j = 0; j<nParticles; j++) {
@@ -354,7 +377,7 @@ int main()
 		}
 		meanVelocityAverage[i] = meanVelocityAverage[i]/nParticles;
 		fprintf(velcorFile, "%e\t%e\n", i*timestep, meanVelocityAverage[i]);
-
+		
 		diffusionCoefficient += meanVelocityAverage[i];
 	}
 
@@ -384,18 +407,17 @@ int main()
 
 	FILE *phiPFile;
 	phiPFile = fopen("phiPressure.data","w");
-	for(i = 0; i<maxCorrelationSteps+1; i++){
+	for(i = 0; i<maxCorrelationSteps; i++){
 		phiTemp[i] = (meanTemp_ik[i] - meanTempSquare)/(meanSquareTemp - meanTempSquare);
 		phiPressure[i] = (meanPressure_ik[i] - meanPressureSquare)/(meanSquarePressure - meanPressureSquare);
- 
 		fprintf(phiTempFile, "%e \t %e \n", (i+1)*timestep, phiTemp[i]); //Dessa behövs inte. De används bara för att kolla i matlab att vi får något vettigt!!!
 		fprintf(phiPFile, "%e \t %e \n", (i+1)*timestep, phiPressure[i]);
 	}
 
-	// Finding s (the longest time for which correlation is above some limit)
+	// Finding M (the longest time for which correlation is above some limit)
 	double limit = exp(-2.0);
 	for(i = 0; i < maxCorrelationSteps; i++){
-		sTemp  = i;
+		MTemp  = i;
 		if( phiTemp[i] < limit){
 			i = maxCorrelationSteps;
 		}
@@ -403,18 +425,32 @@ int main()
 
 
 	for(i = 0; i<maxCorrelationSteps; i++){
-		sPressure  = i+1;
+		MPressure  = i+1;
 		if( phiPressure[i] < limit){
 			i = maxCorrelationSteps;
 		}
 	}
+	
 
+	//Sum over phi to get s - Temperature
+	for(i = 0; i<MTemp; i++){
+		sTemp += phiTemp[i];
+	}
+	sTemp = sTemp*2; // phi is symmetric and we sum from 0 to M not -M to M as it should.
+
+
+	//Sum over phi to get s . Pressure
+	for(i = 0; i<MPressure; i++){
+		sPressure += phiPressure[i];
+	}
+	sPressure = sPressure*2; // phi is symmetric and we sum from 0 to M not -M to M as it should.
 
 	varTemp = meanSquareTemp - meanTempSquare;
 	varPressure = meanSquarePressure - meanPressureSquare;
 
 	varTemp = varTemp*sTemp/nProductionSteps;
 	varPressure = varPressure*sPressure/nProductionSteps;
+printf("sTemp= %e \t sPressure= %e \nVAR[temp]= %e \t VAR[P]= %e \n",sTemp, sPressure, varTemp, varPressure);
 	
 	FILE *valuesFile;
 	valuesFile = fopen("values.data","w");
