@@ -12,3 +12,5 @@ MD
 # Temp files
 *~
 
+# Hidden files
+.*
