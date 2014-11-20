@@ -31,10 +31,12 @@ int main()
 	int correlationDistance = 150;	// this constant determines how separated the points should be in the corr.function (for temperature)
 	int nParticles = 4*pow(nCells,dim);
 	int equilibrationSteps = equilibrationTime/timestep;
-	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
+	double wantedTemp = 700+273;   // The temperature that we want the system to stabilize around.
 	double wantedPressure = 6.32420934 * 0.0000001;	// The pressure that we want the system to stabilize around.
 	double timeConstantT = 0.02;
 	double timeConstantP = 0.05;
+	//double timeConstantT = 1;
+	//double timeConstantP = 1;
 	double mass = 0.00279636;  // 26.9815 u
 	double latticeParameter = 4.05;
 	double maxDeviation = 0.05;
@@ -65,6 +67,7 @@ int main()
 	double varTemp, varPressure;
 	double sTemp, sPressure;
 	double savedPos[msdStep][nParticles][dim];
+	double msd;
 	double savedVelocities[correlationDistance][nParticles][dim];
 	double meanVelocityScalar[correlationDistance][nParticles];
 	double meanVelocityAverage[correlationDistance];
@@ -136,11 +139,13 @@ int main()
 		potentialEnergy = get_energy_AL(pos, nCells*latticeParameter, nParticles);
 		kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 		energy = potentialEnergy + kineticEnergy;
+		fprintf(energyFile,"%e \t %e \t %e \t %e \n", i*timestep, energy, potentialEnergy, kineticEnergy);		
 
 		currentTemp = GetInstantTemperature(vel, nParticles, mass, dim);
 		volume = pow(nCells*latticeParameter, 3);
 		virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
 		currentPressure = GetPressure(currentTemp, volume, virial, nParticles);
+		fprintf(ptFile, "%e \t %e \t %e \n", i*timestep, currentTemp, currentPressure);
 
 		//Calculate alpha (the velocity and position scaling parameters)
 		alphaT = GetAlphaT(wantedTemp, currentTemp, timestep, timeConstantT);
@@ -264,6 +269,13 @@ int main()
 					savedPos[msdStep-1][j][k] = pos[j][k];
 				}
 			}
+		}	
+		for(j = 0; j<nParticles; j++){
+			temp = 0.0;
+			for(k = 0; k<dim; k++){
+				temp += (pos[j][k] - savedPos[msdStep-1][j][k])*(pos[j][k] - savedPos[msdStep-1][j][k]); 
+			}
+			msd += temp;
 		}
 	}	// End of production loop
 
@@ -280,6 +292,9 @@ int main()
 		meanTemp_ik[i] = meanTemp_ik[i]/temp;
 		meanPressure_ik[i] = meanPressure_ik[i]/temp;
 	}
+	
+	msd = msd/temp;
+	printf("msd= %e DETTA ÄR INTE KLART", msd);
 
 	// Final processing and saving of velocity correlation function
 	FILE *velcorFile;
@@ -320,7 +335,6 @@ int main()
 
 	FILE *phiPFile;
 	phiPFile = fopen("phiPressure.data","w");
-	fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, potentialEnergy, kineticEnergy);
 	for(i = 0; i<correlationDistance; i++){
 		phiTemp[i] = (meanTemp_ik[i] - meanTempSquare)/(meanSquareTemp - meanTempSquare);
 		phiPressure[i] = (meanPressure_ik[i] - meanPressureSquare)/(meanSquarePressure - meanPressureSquare);

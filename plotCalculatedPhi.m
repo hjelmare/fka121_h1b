@@ -13,10 +13,11 @@ ylim([-1, 1])
 
 plot(phiT(:,1), exp(-2),'r');
 
-%% Plot positions (x-coordinate) of one particle
+%% Plot positions (3D-plot) of one particle
 clear all
 clc
 pos = importdata('position.data');
+
 hold on
-plot(pos(:,1), pos(:,2),'b');
+plot3(pos(:,2), pos(:,3),pos(:,4),'g');
 

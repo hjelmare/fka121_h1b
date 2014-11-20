@@ -10,23 +10,30 @@ kineticEnergy = data(:,4);
 
 data = importdata('pt.data');
 
-pressure = data(:,2);
-temp = data(:,3);
+temp = data(:,2);
+pressure = data(:,3);
 
-clf
-
+%%
 hold on
 plot(time, energy, 'b');
 plot(time, potentialEnergy, 'g');
-plot(time, kineticEnergy*1e1, 'r');
-plot(time(2:end), pressure*1e4, 'c');
-plot(time(2:end), temp, 'k');
+plot(time, kineticEnergy, 'r');
+legend('total energy', 'potential energy', 'kinetic energy');
+ylabel('energy [eV]');
+xlabel('time (ps)');
+%%
+hold on
+subplot(2,1,1);
+plot(data(:,1), pressure, 'g');
+hold on
+subplot(2,1,2);
+plot(data(:,1), temp, 'm');
 
-legend('total energy', 'potential energy', 'kinetic energy', 'pressure', 'temp');
+legend('pressure', 'temp');
 ylabel('energy [eV]');
 xlabel('time (ps)');
 
-useFrom = 0.4;
+useFrom = 0.6;
 start = fix(length(energy)*useFrom);
 
 meanTemp = mean(temp(start:end))
