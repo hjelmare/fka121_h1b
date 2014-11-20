@@ -26,8 +26,8 @@ temp = data(:,2);
 pressure = data(:,3);
 
 %%
-hold on
 subplot(3,1,1)
+hold on
 plot(time1, energy1, 'b');
 plot(time2, energy2, 'g');
 plot(time3, energy3, 'r');
@@ -36,6 +36,7 @@ title('Total energy')
 ylabel('energy [eV]');
 xlabel('time [ps]');
 subplot(3,1,2)
+hold on
 plot(time1, potentialEnergy1, 'b');
 plot(time2, potentialEnergy2, 'g');
 plot(time3, potentialEnergy3, 'r');
@@ -44,6 +45,7 @@ title('Potential energy');
 ylabel('energy [eV]');
 xlabel('time [ps]');
 subplot(3,1,3)
+hold on
 plot(time1, kineticEnergy1, 'b');
 plot(time2, kineticEnergy2, 'g');
 plot(time3, kineticEnergy3, 'r');

@@ -20,10 +20,10 @@ int main()
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
 	double productionTime = 5;
-	double equilibrationTime = 5;
+	double equilibrationTime = 15;
 	double timestep = 0.01;
 //	timestep = 0.1;
-	timestep = 0.001;
+//	timestep = 0.001;
 	
 	int msdStep = 10;	// vad är detta?	
 	
@@ -36,10 +36,11 @@ int main()
 	int dim = 3;		// do not change. some functions are hardcoded for dim = 3.
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
+	int MTemp, MPressure;    // The values at which the points of Temp and Pressure no longer are correlated.
 	double wantedTemp = 500+273;   // The temperature that we want the system to stabilize around.
 //	wantedTemp = 700+273;
 //	wantedTemp = 900+273;
-	double wantedPressure = 6.32420934 * 0.0000001;	// The pressure that we want the system to stabilize around.
+	double wantedPressure =  6.32420934* 0.0000001;	// The pressure that we want the system to stabilize around.
 	double timeConstantT = 0.02;
 	double timeConstantP = 0.05;
 	//double timeConstantT = 1;
@@ -53,6 +54,7 @@ int main()
 	double nProductionSteps = productionTime/timestep;
 	int equilibrationSteps = equilibrationTime/timestep;
 	int maxCorrelationSteps = maxCorrelationTime/timestep;
+
 
 	// storage of physical quantities
 	double pos[nParticles][dim];
@@ -118,10 +120,10 @@ int main()
 
 	//Saving initial data:
 	FILE *energyFile;
-	//energyFile = fopen("energy.data","w");
+	energyFile = fopen("energy.data","w");
 	//energyFile = fopen("energyT1.data","w");
 	//energyFile = fopen("energyT2.data","w");
-	energyFile = fopen("energyT3.data","w");
+	//energyFile = fopen("energyT3.data","w");
 	fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, potentialEnergy, kineticEnergy);
 
 	FILE *ptFile;
@@ -129,6 +131,10 @@ int main()
 
 	FILE *positionFile;
 	positionFile = fopen("position.data","w");
+//	positionFile = fopen("position1.data","w");
+//	positionFile = fopen("position2.data","w");
+//	positionFile = fopen("position3.data","w");
+
 
 // Initialization is done, moving on to equilibration
 	printf("\t\tDone!\nEquilibration\t");
@@ -234,7 +240,9 @@ int main()
 			for (j = 0; j<maxCorrelationSteps; j++){
 				meanTemp_ik[j] += savedValuesT[maxCorrelationSteps - 1] * savedValuesT[maxCorrelationSteps - 1 - j];
 				meanPressure_ik[j] += savedValuesP[maxCorrelationSteps - 1]* savedValuesP[maxCorrelationSteps - 1 - j];
+			//	printf("%e \t",meanTemp_ik[j]);
 			}
+			//printf("\n");
 			meanTemp += currentTemp;
 			meanPressure += currentPressure;
 			meanSquareTemp += currentTemp * currentTemp;
@@ -314,13 +322,13 @@ int main()
 	meanSquareTemp = meanSquareTemp/nAverageSteps;
 	meanPressure = meanPressure/nAverageSteps;
 	meanSquarePressure = meanSquarePressure/nAverageSteps;
+printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSquarePressure);
 //printf("test = %e \t calculated= %e \n", test, temp);
 
 	//The last step to calculate the mean values of meanTemp_ik & meanPressure_ik.
 	for(i = 0; i < maxCorrelationSteps+1; i++){
 		meanTemp_ik[i] = meanTemp_ik[i]/nAverageSteps;
 		meanPressure_ik[i] = meanPressure_ik[i]/nAverageSteps;
-//printf("ik_T = %e \t ik_P = %e \n", meanTemp_ik[i], meanPressure_ik[i]);
 	}
 	
 	msd = msd/nAverageSteps;
@@ -369,18 +377,17 @@ int main()
 
 	FILE *phiPFile;
 	phiPFile = fopen("phiPressure.data","w");
-	for(i = 0; i<maxCorrelationSteps+1; i++){
+	for(i = 0; i<maxCorrelationSteps; i++){
 		phiTemp[i] = (meanTemp_ik[i] - meanTempSquare)/(meanSquareTemp - meanTempSquare);
 		phiPressure[i] = (meanPressure_ik[i] - meanPressureSquare)/(meanSquarePressure - meanPressureSquare);
- 
 		fprintf(phiTempFile, "%e \t %e \n", (i+1)*timestep, phiTemp[i]); //Dessa behövs inte. De används bara för att kolla i matlab att vi får något vettigt!!!
 		fprintf(phiPFile, "%e \t %e \n", (i+1)*timestep, phiPressure[i]);
 	}
 
-	// finds s automatic (so that we don't have to read it from a plot)
+	// finds M automatic (so that we don't have to read it from a plot)
 	double limit = exp(-2.0);
 	for(i = 0; i < maxCorrelationSteps; i++){
-		sTemp  = i;
+		MTemp  = i;
 		if( phiTemp[i] < limit){
 			i = maxCorrelationSteps;
 		}
@@ -388,12 +395,25 @@ int main()
 
 
 	for(i = 0; i<maxCorrelationSteps; i++){
-		sPressure  = i+1;
+		MPressure  = i+1;
 		if( phiPressure[i] < limit){
 			i = maxCorrelationSteps;
 		}
 	}
+	
 
+	//Sum over phi to get s - Temperature
+	for(i = 0; i<MTemp; i++){
+		sTemp += phiTemp[i];
+	}
+	sTemp = sTemp*2; // phi is symmetric and we sum from 0 to M not -M to M as it should.
+
+
+	//Sum over phi to get s . Pressure
+	for(i = 0; i<MPressure; i++){
+		sPressure += phiPressure[i];
+	}
+	sPressure = sPressure*2; // phi is symmetric and we sum from 0 to M not -M to M as it should.
 
 	varTemp = meanSquareTemp - meanTempSquare;
 	varPressure = meanSquarePressure - meanPressureSquare;
@@ -401,7 +421,7 @@ int main()
 	varTemp = varTemp*sTemp/nProductionSteps;
 	varPressure = varPressure*sPressure/nProductionSteps;
 
-//printf("The s parameters are: sTemp= %e \t sPressure= %e \nthe variation of the temperature is %e \t the variation of the pressure is %e \n",sTemp, sPressure, varTemp, varPressure);
+printf("sTemp= %e \t sPressure= %e \nVAR[temp]= %e \t VAR[P]= %e \n",sTemp, sPressure, varTemp, varPressure);
 //printf("våra s-värden är inte så rimliga. Har vi för stort tidssteg? för liten equilibrationsteps? för få tidssteg?");
 		// Savesthevalues needed to calculate the statistical inefficiency (s), for T and P.
 	
