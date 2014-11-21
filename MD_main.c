@@ -32,10 +32,10 @@ int main()
 	double timeConstantP = 0.05;
 
 	// physical parameters
-	int dim = 3;		// do not change. some functions are hardcoded for dim = 3.
+	int dim = 3;		// do not change
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
-	double wantedTemperature = 500+273;   // The temperature that we want the system to stabilize around.
+	double wantedTemperature = 500+273;   // Target temperature
 //	wantedTemperature = 700+273;
 	wantedTemperature = 900+273;
 	double wantedPressure =  6.32420934* 0.0000001;	// 1 atm in metal units
@@ -68,9 +68,13 @@ int main()
 	double virial;
 	double volume;
 	double nAverageSteps;
-	double meanTemperature, meanSquareTemperature, meanTemperature_ik[maxCorrelationSteps-1];
-	double meanPressure, meanSquarePressure, meanPressure_ik[maxCorrelationSteps-1];
-	double phiTemperature[maxCorrelationSteps], phiPressure[maxCorrelationSteps], meanTemperatureSquare, meanPressureSquare;
+	double meanTemperature, meanSquareTemperature;
+	double meanTemperature_ik[maxCorrelationSteps-1];
+	double meanPressure, meanSquarePressure;
+	double meanPressure_ik[maxCorrelationSteps-1];
+	double phiTemperature[maxCorrelationSteps];
+	double phiPressure[maxCorrelationSteps];
+	double meanTemperatureSquare, meanPressureSquare;
 	double varTemperature, varPressure;
 	double sTemperature, sPressure;
 	double savedPos[maxCorrelationSteps][nParticles][dim];
@@ -82,7 +86,7 @@ int main()
 	double meanDistanceScalar[maxCorrelationSteps][nParticles];
 	double meanDistanceAverage[maxCorrelationSteps];
 	double msdDiffCoeff = 0;
-	int MTemperature, MPressure;    // The values at which the points of Temp and Pressure no longer are correlated.
+	int MTemperature, MPressure;
 
 	// other stuff
 	int i,j,k,m;   
@@ -99,7 +103,8 @@ int main()
 	for(i = 0; i<nParticles; i++){
 		for (j = 0; j<3; j++){
 			random_value = (double) rand() / (double) RAND_MAX;
-			pos[i][j] = pos[i][j] + (random_value-0.5) * maxDeviation * latticeParameter;
+			pos[i][j] = pos[i][j] + (random_value-0.5) * maxDeviation * \
+																	latticeParameter;
  		}
 	}
 
@@ -120,25 +125,20 @@ int main()
 	// Saving initial energies on the first line in the file
 	FILE *energyFile;
 	energyFile = fopen("energy.data","w");
-	//energyFile = fopen("energyT1.data","w");	// other filenames for other temperature
-	//energyFile = fopen("energyT2.data","w");	// if you don't want to rename data files manually
-	//energyFile = fopen("energyT3.data","w");	// between runs at different temperatures
-	fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, potentialEnergy, kineticEnergy);
+	fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, potentialEnergy, \
+																															kineticEnergy);
 
 	FILE *ptFile;
 	ptFile = fopen("pt.data","w");
 
 	FILE *positionFile;
 	positionFile = fopen("position.data","w");
-//	positionFile = fopen("position1.data","w");
-//	positionFile = fopen("position2.data","w");
-//	positionFile = fopen("position3.data","w");
-
 
 // Initialization is done, moving on to equilibration
 
 	printf("\t");	// Progress indicator stuff
-	for (i = 0; i < ( nEquilibrationSteps > nProductionSteps  ? nEquilibrationSteps:nProductionSteps )/100; i++) {
+	for (i = 0; i < ( nEquilibrationSteps > nProductionSteps  ? \
+										nEquilibrationSteps:nProductionSteps )/100; i++) {
 		printf(".");
 	}
 	printf("\tDone!\nEquilibration\t");
@@ -166,18 +166,23 @@ int main()
 		potentialEnergy = get_energy_AL(pos, nCells*latticeParameter, nParticles);
 		kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
 		energy = potentialEnergy + kineticEnergy;
-		fprintf(energyFile,"%e \t %e \t %e \t %e \n", (i+1)*timestep, energy, potentialEnergy, kineticEnergy);		
+		fprintf(energyFile,"%e \t %e \t %e \t %e \n", (i+1)*timestep, energy, \
+																					potentialEnergy, kineticEnergy);		
 
 		// Get temperature and pressure
 		currentTemperature = GetInstantTemperature(vel, nParticles, mass, dim);
 		volume = pow(nCells*latticeParameter, 3);
 		virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
-		currentPressure = GetPressure(currentTemperature, volume, virial, nParticles);
-		fprintf(ptFile, "%e \t %e \t %e \n", (i+1)*timestep, currentTemperature, currentPressure);
+		currentPressure = GetPressure(currentTemperature, volume, virial, \
+																					nParticles);
+		fprintf(ptFile, "%e \t %e \t %e \n", (i+1)*timestep, currentTemperature, \
+																					currentPressure);
 
 		// Calculate scaling parameters for equilibration
-		alphaT = GetAlphaT(wantedTemperature, currentTemperature, timestep, timeConstantT);
-		alphaP = GetAlphaP(wantedPressure, currentPressure, timestep, timeConstantP);
+		alphaT = GetAlphaT(wantedTemperature, currentTemperature, timestep, \
+																					timeConstantT);
+		alphaP = GetAlphaP(wantedPressure, currentPressure, timestep, \
+																					timeConstantP);
 		sqrtAlphaT = sqrt(alphaT);
 		curtAlphaP = pow(alphaP, 1.0 / 3);
 
@@ -200,8 +205,10 @@ int main()
 	printf("\tDone!\nProduction\t");
 	
 	for (i=0;i<nProductionSteps;i++) {
-		//Save positions of one particle to check whether the aluminium is solid or liquid
-		fprintf(positionFile, "%d \t %e \t %e \t %e \n", i, pos[0][0], pos[0][1], pos[0][2]);
+		// Save positions of one particle to check whether the
+		// aluminium is solid or liquid
+		fprintf(positionFile, "%d \t %e \t %e \t %e \n", i, \
+																	pos[0][0], pos[0][1], pos[0][2]);
 
 		// Update velocities and positions
 		for (j=0; j<nParticles; j++) {
@@ -228,7 +235,8 @@ int main()
 		currentTemperature = GetInstantTemperature(vel, nParticles, mass, dim);
 		volume = pow(nCells*latticeParameter, 3);
 		virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
-		currentPressure = GetPressure(currentTemperature, volume, virial, nParticles);
+		currentPressure = GetPressure(currentTemperature, volume, virial, \
+																									nParticles);
 
 		//Saves temp and pressure values in order to calculate s.
 		if (i < maxCorrelationSteps) {
@@ -245,8 +253,10 @@ int main()
 			
 			// calculates and saves f_i*f_k
 			for (j = 0; j<maxCorrelationSteps; j++){
-				meanTemperature_ik[j] += savedValuesT[maxCorrelationSteps - 1] * savedValuesT[maxCorrelationSteps - 1 - j];
-				meanPressure_ik[j] += savedValuesP[maxCorrelationSteps - 1]* savedValuesP[maxCorrelationSteps - 1 - j];
+				meanTemperature_ik[j] += savedValuesT[maxCorrelationSteps - 1] *\
+														 savedValuesT[maxCorrelationSteps - 1 - j];
+				meanPressure_ik[j] += savedValuesP[maxCorrelationSteps - 1] *\
+														savedValuesP[maxCorrelationSteps - 1 - j];
 			//	printf("%e \t",meanTemperature_ik[j]);
 			}
 			//printf("\n");
@@ -279,7 +289,8 @@ int main()
 
 			for (j = 0; j<maxCorrelationSteps; j++) {
 				for (m = 0; m < nParticles; m++) {
-					meanVelocityScalar[j][m] += ScalarProduct(savedVelocities[0][m],savedVelocities[j][m]);
+					meanVelocityScalar[j][m] += ScalarProduct(savedVelocities[0][m],\
+																										savedVelocities[j][m]);
 				}
 			}
 		}
@@ -305,7 +316,8 @@ int main()
 			}
 			for(j = 0; j<maxCorrelationSteps; j++){
 				for(k = 0; k<nParticles; k++){
-					meanDistanceScalar[j][k] += getDistanceSquared(savedPos[0][k], savedPos[j][k]); 
+					meanDistanceScalar[j][k] += getDistanceSquared(savedPos[0][k],\
+																													savedPos[j][k]); 
 				}
 			}
 		} 
@@ -327,7 +339,8 @@ int main()
 	FILE *valuesFile;		// For saving various values (non-array data)
 	valuesFile = fopen("values.data","w");
 	
-	nAverageSteps = nProductionSteps-maxCorrelationSteps;	// number of steps over which to take averages
+	nAverageSteps = nProductionSteps-maxCorrelationSteps;
+			// take averages over this many steps
 	
 	FILE *msdFile;
 	msdFile = fopen("msd3.data","w");
@@ -343,13 +356,15 @@ int main()
 	}
 
 	// Diffusion coeff from MSD
-	for (i = maxCorrelationSteps - msdAverageSteps; i < maxCorrelationSteps; i++) {
+	for (i = maxCorrelationSteps - msdAverageSteps; \
+													i < maxCorrelationSteps; i++) {
 		msdDiffCoeff += 1.0/(6*i*timestep)*meanDistanceAverage[i];
 	}
 	msdDiffCoeff = msdDiffCoeff / msdAverageSteps;
 	fprintf(valuesFile,"%e\tDiffusion coeff (MSD)\n", msdDiffCoeff);
 
-	// Final processing and saving of velocity correlation function and diffusion coeff from time integral
+	// Final processing and saving of velocity correlation
+	// function and diffusion coeff from time integral
 	FILE *velcorFile;
 	velcorFile = fopen("velcor.data","w");
 
@@ -367,8 +382,10 @@ int main()
 		diffusionCoefficient += meanVelocityAverage[i];
 	}
 
-	diffusionCoefficient = (1.0/3.0) * diffusionCoefficient / maxCorrelationSteps;
-	fprintf(valuesFile,"%e\tDiffusion coeff (time integral)\n", diffusionCoefficient);
+	diffusionCoefficient = (1.0/3.0) * \
+			diffusionCoefficient / maxCorrelationSteps;
+	fprintf(valuesFile,"%e\tDiffusion coeff (time integral)\n", \
+												diffusionCoefficient);
 
 	// Calculating and saving spectrum integral thingy
 	FILE *spectrumFile;
@@ -377,10 +394,12 @@ int main()
 	for( i = 0; i < nSpectrumPoints; i++) {
 		spectrum[i] = 0;
 		for( j = 0; j < maxCorrelationSteps; j++) {
-			spectrum[i] += meanVelocityAverage[j] * cos(spectrumInterval * i * j / nSpectrumPoints);
+			spectrum[i] += meanVelocityAverage[j] * cos(spectrumInterval * \
+																					i * j / nSpectrumPoints);
 		}
 		spectrum[i] = 2 * spectrum[i]/maxCorrelationSteps;
-		fprintf(spectrumFile,"%e \t %e \n",i*spectrumInterval/nSpectrumPoints,spectrum[i]);
+		fprintf(spectrumFile,"%e \t %e \n",i*spectrumInterval/nSpectrumPoints, \
+																								spectrum[i]);
 	}
 
 	// Setting up for calculating correlation data for temperature and pressure
@@ -406,8 +425,10 @@ int main()
 	phiPFile = fopen("phiPressure.data","w");
 	
 	for(i = 0; i<maxCorrelationSteps; i++){
-		phiTemperature[i] = (meanTemperature_ik[i] - meanTemperatureSquare)/(meanSquareTemperature - meanTemperatureSquare);
-		phiPressure[i] = (meanPressure_ik[i] - meanPressureSquare)/(meanSquarePressure - meanPressureSquare);
+		phiTemperature[i] = (meanTemperature_ik[i] - meanTemperatureSquare)/ \
+													(meanSquareTemperature - meanTemperatureSquare);
+		phiPressure[i] = (meanPressure_ik[i] - meanPressureSquare)/ \
+													(meanSquarePressure - meanPressureSquare);
 		fprintf(phiTFile, "%e \t %e \n", (i+1)*timestep, phiTemperature[i]);
 		fprintf(phiPFile, "%e \t %e \n", (i+1)*timestep, phiPressure[i]);
 	}
@@ -430,13 +451,15 @@ int main()
 	for(i = 0; i<MTemperature; i++){
 		sTemperature += phiTemperature[i];
 	}
-	sTemperature = sTemperature*2; // phi is symmetric and we sum from 0 to M instead of from -M to M
+	sTemperature = sTemperature*2;
+	// phi is symmetric and we sum from 0 to M instead of from -M to M
 
 	//Sum over phi to get statistical inefficiency for pressure
 	for(i = 0; i<MPressure; i++){
 		sPressure += phiPressure[i];
 	}
-	sPressure = sPressure*2; // phi is symmetric and we sum from 0 to M instead of from -M to M
+	sPressure = sPressure*2;
+	// phi is symmetric and we sum from 0 to M instead of from -M to M
 
 	// Calculating variances
 	varTemperature = meanSquareTemperature - meanTemperatureSquare;
@@ -450,7 +473,7 @@ int main()
 	fprintf(valuesFile,"%e\tvarPressure\n",varPressure);
 	
 	FILE *donefile;				// Just an empty file to indicate that program is done
-	donefile = fopen("done.data", "w");	// useful when using ssh+screen for running simulations
+	donefile = fopen("done.data", "w");	// useful when using ssh+screen
 	fprintf(donefile, "done");
 
 	close(energyFile);

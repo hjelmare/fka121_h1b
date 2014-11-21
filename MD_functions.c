@@ -44,6 +44,8 @@ int nParticles)
 
 double GetInstantTemperature(double vel [][3], int nParticles, \
 double mass, int dim)
+
+
 {
 	double temperature = 0;
 	int i,j;
@@ -51,7 +53,7 @@ double mass, int dim)
 	double factor = 2/(3*nParticles*BOLTZMANN);
 
 	for (i=0;i<nParticles;i++) {
-		for (j=0;j<dim;j++) {  // ändrade i denna for-loop, den gick till nParticles, men ska väl bara gå över dimensionerna /Albin
+		for (j=0;j<dim;j++) {
 			temperature += factor * pow(vel[i][j],2)*mass/2;
 		}
 	}	
@@ -77,7 +79,8 @@ double GetKineticEnergy(double vel[][3], double mass, int nParticles)
 }
 
 // Calculate alphaT (the modifier to get the right temperature)
-double GetAlphaT(double wantedTemp, double currentTemp, double timestep, double timeConstant)
+double GetAlphaT(double wantedTemp, double currentTemp, \
+												double timestep, double timeConstant)
 {
 	double alpha;
 	alpha = 1 + timestep/timeConstant * (wantedTemp-currentTemp)/currentTemp;
@@ -88,7 +91,8 @@ double GetAlphaT(double wantedTemp, double currentTemp, double timestep, double 
 
 
 // Calculate alphaP (the modifier to get the right pressure)
-double GetAlphaP(double wantedPressure, double currentPressure, double timestep, double timeConstant)
+double GetAlphaP(double wantedPressure, double currentPressure, \
+													double timestep, double timeConstant)
 {
 	double kappa = 2.21901454; // Å^3/eV (at 300K)
 	double alpha;
