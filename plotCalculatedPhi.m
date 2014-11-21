@@ -20,7 +20,6 @@ clc
 pos1 = importdata('position1.data');
 pos2 = importdata('position2.data');
 pos3 = importdata('position3.data');
-%%
 
 textStorlek = 14;
 legendStorlek = 11;

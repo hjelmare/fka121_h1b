@@ -1,3 +1,7 @@
+% in some places, data for several temperatures is required
+% so you need to run the main program several times with
+% different temperature settings and manually rename data files
+
 clear all
 clc
 
@@ -163,4 +167,24 @@ set(text, 'FontSize', legendStorlek);
 
 saveas(gcf,'MSD.png','png')
 
+%% Plot positions (3D-plot) of one particle
+clear all
+clc
+pos1 = importdata('position1.data');
+pos2 = importdata('position2.data');
+pos3 = importdata('position3.data');
+
+textStorlek = 14;
+legendStorlek = 11;
+
+hold on
+plot3(pos1(:,2), pos1(:,3),pos1(:,4),'b');
+plot3(pos2(:,2), pos2(:,3),pos2(:,4),'g.');
+plot3(pos3(:,2), pos3(:,3),pos3(:,4),'r.-');
+text = legend('T=773K', 'T=973K', 'T=1173K');
+set(text, 'FontSize', legendStorlek);
+
+xlabel('[Å]', 'FontSize',textStorlek);
+ylabel('[Å]', 'FontSize',textStorlek);
+zlabel('[Å]', 'FontSize',textStorlek);
 
