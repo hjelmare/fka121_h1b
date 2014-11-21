@@ -32,7 +32,8 @@ double ScalarProduct(double vec1[3], double vec2[3])
 }
 
 
-double GetPressure(double temperature, double volume, double virial, int nParticles)
+double GetPressure(double temperature, double volume, double virial, \
+int nParticles)
 {
 	double pressure = 0;
 
@@ -41,7 +42,8 @@ double GetPressure(double temperature, double volume, double virial, int nPartic
 	return pressure;
 }
 
-double GetInstantTemperature(double vel [][3], int nParticles, double mass, int dim)
+double GetInstantTemperature(double vel [][3], int nParticles, \
+double mass, int dim)
 {
 	double temperature = 0;
 	int i,j;

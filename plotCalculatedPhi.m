@@ -1,9 +1,10 @@
+%% Plot phi
 clear all
 clc
 
 phiP = importdata('phiPressure.data');
 phiT = importdata('phiTemp.data');
-%%
+
 
 plot(phiT(:,1), phiT(:,2), 'b');
 hold on
@@ -20,7 +21,7 @@ clc
 pos1 = importdata('position1.data');
 pos2 = importdata('position2.data');
 pos3 = importdata('position3.data');
-%%
+
 
 textStorlek = 14;
 legendStorlek = 11;

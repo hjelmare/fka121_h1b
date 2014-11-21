@@ -37,7 +37,7 @@ int main()
 	int nParticles = 4*pow(nCells,dim);
 	double wantedTemperature = 500+273;   // The temperature that we want the system to stabilize around.
 //	wantedTemperature = 700+273;
-//	wantedTemperature = 900+273;
+	wantedTemperature = 900+273;
 	double wantedPressure =  6.32420934* 0.0000001;	// 1 atm in metal units
 	double mass = 0.00279636;  // 26.9815 u * 1.0364 * 0.0001
 	double latticeParameter = 4.05;
