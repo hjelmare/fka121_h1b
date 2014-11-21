@@ -84,50 +84,29 @@ start = fix(length(energy)*useFrom);
 meanTemp = mean(temp(start:end))
 meanPress = mean(pressure(start:end))
 
-%%
-
-clear all
-clc
-clf
-
-data = importdata('velcor.data');
-
-plot(data(:,1),data(:,2))
-
-%%
-
-clear all
-clc
-
-data = importdata('spectrum.data');
-
-hold on
-plot(data(:,1),data(:,2),'b')
-
-%%
-
-clear all
-clc
-clf
-
-data = importdata('pt2.data');
-
-hold on
-plot(data(:,1),data(:,2),'r')
-plot(data(:,1),data(:,3),'b')
-hold off
-
 %% Velocity correlation function
 
 clear all
 clc
 clf
 
-data = importdata('velcor.data');
-plot(data(:,1),data(:,2));
+textStorlek = 14;
+legendStorlek = 11;
 
-ylabel('Velocity correlation [(Å/ps^2)^2]')
-xlabel('\Delta t [ps]')
+data_500 = importdata('velcor_500.data');
+data_700 = importdata('velcor_700.data');
+data_900 = importdata('velcor_900.data');
+
+hold on
+plot(data_500(:,1),data_500(:,2),'b')
+plot(data_700(:,1),data_700(:,2),'g.')
+plot(data_900(:,1),data_900(:,2),'r--')
+
+ylabel('Velocity correlation [(Å/ps^2)^2]','FontSize',textStorlek)
+xlabel('\Delta t [ps]','FontSize',textStorlek)
+
+text = legend('T = 773 K', 'T = 973 K', 'T = 1173 K');
+set(text, 'FontSize', legendStorlek);
 
 saveas(gcf,'velcor.png','png')
 
@@ -137,11 +116,23 @@ clear all
 clc
 clf
 
-data = importdata('spectrum.data');
-plot(data(:,1),data(:,2));
+textStorlek = 14;
+legendStorlek = 11;
 
-ylabel('Spectrum of velocity correlation function [(Å/ps^2)^2]')
-xlabel('\omega [rad]')
+data_500 = importdata('spectrum_500.data');
+data_700 = importdata('spectrum_700.data');
+data_900 = importdata('spectrum_900.data');
+
+hold on
+plot(data_500(:,1),data_500(:,2),'b')
+plot(data_700(:,1),data_700(:,2),'g.')
+plot(data_900(:,1),data_900(:,2),'r--')
+
+ylabel('Spectrum of velocity correlation function [(Å/ps^2)^2]','FontSize',textStorlek)
+xlabel('\omega [rad/ps]','FontSize',textStorlek)
+
+text = legend('T = 773 K', 'T = 973 K', 'T = 1173 K');
+set(text, 'FontSize', legendStorlek);
 
 saveas(gcf,'spectrum.png','png')
 
