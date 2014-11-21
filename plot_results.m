@@ -24,10 +24,7 @@ energy3 = data(:,2);
 potentialEnergy3 = data(:,3);
 kineticEnergy3 = data(:,4);
 
-data = importdata('pt.data');
 
-temp = data(:,2);
-pressure = data(:,3);
 
 %%
 textStorlek = 14;
@@ -35,8 +32,8 @@ legendStorlek = 11;
 subplot(3,1,1)
 hold on
 plot(time1, energy1, 'b');
-plot(time2, energy2, 'g');
-plot(time3, energy3, 'r');
+plot(time2, energy2, 'g.');
+plot(time3, energy3, 'r--');
 text =legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
 set(text, 'FontSize', legendStorlek);
 title('Total energy', 'FontSize',textStorlek)
@@ -45,8 +42,8 @@ xlabel('time [ps]', 'FontSize',textStorlek);
 subplot(3,1,2)
 hold on
 plot(time1, potentialEnergy1, 'b');
-plot(time2, potentialEnergy2, 'g');
-plot(time3, potentialEnergy3, 'r');
+plot(time2, potentialEnergy2, 'g.');
+plot(time3, potentialEnergy3, 'r--');
 text = legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
 set(text, 'FontSize', legendStorlek);
 title('Potential energy', 'FontSize',textStorlek);
@@ -55,19 +52,29 @@ xlabel('time [ps]', 'FontSize',textStorlek);
 subplot(3,1,3)
 hold on
 plot(time1, kineticEnergy1, 'b');
-plot(time2, kineticEnergy2, 'g');
-plot(time3, kineticEnergy3, 'r');
+plot(time2, kineticEnergy2, 'g.');
+plot(time3, kineticEnergy3, 'r--');
 text = legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
 set(text, 'FontSize', legendStorlek);
 title('Kinetic energy', 'FontSize',textStorlek);
 ylabel('energy [eV]', 'FontSize',textStorlek);
 xlabel('time [ps]', 'FontSize',textStorlek);
-%%
+%% Equilibration - T & P
+data = importdata('pt500.data');
+temp500 = data(:,2);
+pressure500 = data(:,3);
+
+data = importdata('pt700.data');
+temp700 = data(:,2);
+pressure700 = data(:,3);
+
 textStorlek = 14;
 legendStorlek = 11;
+
+
 hold on
 subplot(2,1,1);
-plot(data(:,1), pressure, 'g');
+plot(data(:,1), pressure500, 'g');
 text  = legend('Pressure');
 set(text, 'FontSize', legendStorlek);
 ylabel('Pressure [eV/Å^{3}]', 'FontSize',textStorlek);
@@ -76,10 +83,28 @@ xlabel('time [ps]', 'FontSize',textStorlek);
 hold on
 
 subplot(2,1,2);
-plot(data(:,1), temp, 'b');
+plot(data(:,1), temp500, 'b');
 text = legend('Temperature');
 set(text, 'FontSize', legendStorlek);
-ylabel('energy [K]', 'FontSize',textStorlek);
+ylabel('temperature [K]', 'FontSize',textStorlek);
+xlabel('time [ps]', 'FontSize',textStorlek);
+
+figure
+hold on
+subplot(2,1,1);
+plot(data(:,1), pressure700, 'g');
+text  = legend('Pressure');
+set(text, 'FontSize', legendStorlek);
+ylabel('Pressure [eV/Å^{3}]', 'FontSize',textStorlek);
+xlabel('time [ps]', 'FontSize',textStorlek);
+
+hold on
+
+subplot(2,1,2);
+plot(data(:,1), temp700, 'b');
+text = legend('Temperature');
+set(text, 'FontSize', legendStorlek);
+ylabel('temperature [K]', 'FontSize',textStorlek);
 xlabel('time [ps]', 'FontSize',textStorlek);
 
 useFrom = 0.6;
@@ -149,7 +174,7 @@ clf
 data = importdata('msd.data');
 data2 = importdata('msd2.data');
 data3 = importdata('msd3.data');
-%%
+
 textStorlek = 14;
 legendStorlek = 11;
 
