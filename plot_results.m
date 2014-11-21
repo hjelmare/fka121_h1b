@@ -26,48 +26,57 @@ temp = data(:,2);
 pressure = data(:,3);
 
 %%
+textStorlek = 14;
+legendStorlek = 11;
 subplot(3,1,1)
 hold on
 plot(time1, energy1, 'b');
 plot(time2, energy2, 'g');
 plot(time3, energy3, 'r');
-legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
-title('Total energy')
-ylabel('energy [eV]');
-xlabel('time [ps]');
+text =legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
+set(text, 'FontSize', legendStorlek);
+title('Total energy', 'FontSize',textStorlek)
+ylabel('energy [eV]', 'FontSize', textStorlek);
+xlabel('time [ps]', 'FontSize',textStorlek);
 subplot(3,1,2)
 hold on
 plot(time1, potentialEnergy1, 'b');
 plot(time2, potentialEnergy2, 'g');
 plot(time3, potentialEnergy3, 'r');
-legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
-title('Potential energy');
-ylabel('energy [eV]');
-xlabel('time [ps]');
+text = legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
+set(text, 'FontSize', legendStorlek);
+title('Potential energy', 'FontSize',textStorlek);
+ylabel('energy [eV]', 'FontSize',textStorlek);
+xlabel('time [ps]', 'FontSize',textStorlek);
 subplot(3,1,3)
 hold on
 plot(time1, kineticEnergy1, 'b');
 plot(time2, kineticEnergy2, 'g');
 plot(time3, kineticEnergy3, 'r');
-legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
-title('Kinetic energy');
-ylabel('energy [eV]');
-xlabel('time [ps]');
+text = legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
+set(text, 'FontSize', legendStorlek);
+title('Kinetic energy', 'FontSize',textStorlek);
+ylabel('energy [eV]', 'FontSize',textStorlek);
+xlabel('time [ps]', 'FontSize',textStorlek);
 %%
+textStorlek = 14;
+legendStorlek = 11;
 hold on
 subplot(2,1,1);
 plot(data(:,1), pressure, 'g');
-legend('Pressure');
-ylabel('Pressure [eV/Å^{3}]');
-xlabel('time [ps]');
+text  = legend('Pressure');
+set(text, 'FontSize', legendStorlek);
+ylabel('Pressure [eV/Å^{3}]', 'FontSize',textStorlek);
+xlabel('time [ps]', 'FontSize',textStorlek);
 
 hold on
 
 subplot(2,1,2);
 plot(data(:,1), temp, 'b');
-legend('Temperature');
-ylabel('energy [K]');
-xlabel('time [ps]');
+text = legend('Temperature');
+set(text, 'FontSize', legendStorlek);
+ylabel('energy [K]', 'FontSize',textStorlek);
+xlabel('time [ps]', 'FontSize',textStorlek);
 
 useFrom = 0.6;
 start = fix(length(energy)*useFrom);
@@ -145,6 +154,9 @@ clf
 data = importdata('msd.data');
 data2 = importdata('msd2.data');
 data3 = importdata('msd3.data');
+%%
+textStorlek = 14;
+legendStorlek = 11;
 
 hold on
 plot(data(:,1),data(:,2), 'b');
@@ -153,10 +165,10 @@ plot(data2(:,1),data2(:,2),'r--');
 
 
 
-ylabel('MSD ')
-xlabel('\Delta t [ps]')
-legend('T=773K', 'T=973', 'T=1173K')
-
+ylabel('MSD ', 'FontSize',textStorlek)
+xlabel('\Delta t [ps]', 'FontSize',textStorlek)
+text = legend('T=773K', 'T=973', 'T=1173K');
+set(text, 'FontSize', legendStorlek);
 
 saveas(gcf,'MSD.png','png')
 
