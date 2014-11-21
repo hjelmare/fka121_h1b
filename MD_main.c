@@ -1,8 +1,4 @@
-/*
- MD_main.c
- 
- Created by AL on 2013-10-31.
- */
+// MD_main.c
 
 #include <stdio.h>
 #include <math.h>
@@ -19,30 +15,30 @@ int main()
 {
 	// REMEMBER: \m/ METAL UNITS \m/
 	// simulation settings
-	double productionTime = 10;
+	double productionTime = 5;
 	double equilibrationTime = 5;
 	double timestep = 0.01;
 //	timestep = 0.1;
 //	timestep = 0.001;
+
 	double msdAverageSteps = 50;
 		
-	
 	int nSpectrumPoints = 1000;
 	double spectrumInterval = PI;
 	
 	double maxCorrelationTime = 1;
 	
+	double timeConstantT = 0.02;
+	double timeConstantP = 0.05;
+
 	// physical parameters
 	int dim = 3;		// do not change. some functions are hardcoded for dim = 3.
 	int nCells = 4;
 	int nParticles = 4*pow(nCells,dim);
-	int MTemperature, MPressure;    // The values at which the points of Temp and Pressure no longer are correlated.
 	double wantedTemperature = 500+273;   // The temperature that we want the system to stabilize around.
 //	wantedTemperature = 700+273;
 //	wantedTemperature = 900+273;
-	double wantedPressure =  6.32420934* 0.0000001;	// The pressure that we want the system to stabilize around.
-	double timeConstantT = 0.02;
-	double timeConstantP = 0.05;
+	double wantedPressure =  6.32420934* 0.0000001;	// 1 atm in metal units
 	double mass = 0.00279636;  // 26.9815 u * 1.0364 * 0.0001
 	double latticeParameter = 4.05;
 	double maxDeviation = 0.05;
@@ -50,7 +46,6 @@ int main()
 	// derived quantities
 	double nEquilibrationSteps = equilibrationTime/timestep;
 	double nProductionSteps = productionTime/timestep;
-//	int equilibrationSteps = equilibrationTime/timestep;
 	int maxCorrelationSteps = maxCorrelationTime/timestep;
 
 
@@ -87,6 +82,7 @@ int main()
 	double meanDistanceScalar[maxCorrelationSteps][nParticles];
 	double meanDistanceAverage[maxCorrelationSteps];
 	double msdDiffCoeff = 0;
+	int MTemperature, MPressure;    // The values at which the points of Temp and Pressure no longer are correlated.
 
 	// other stuff
 	int i,j,k,m;   
@@ -94,7 +90,7 @@ int main()
 	srand(time(NULL));
 	double random_value;
 
-	// End of variable declarations, start of actual code
+// End of variable declarations, start of actual code
 
 	printf("Initializing");
 	init_fcc(pos, nCells, latticeParameter);
@@ -126,7 +122,7 @@ int main()
 	energyFile = fopen("energy.data","w");
 	//energyFile = fopen("energyT1.data","w");	// other filenames for other temperature
 	//energyFile = fopen("energyT2.data","w");	// if you don't want to rename data files manually
-	//energyFile = fopen("energyT3.data","w");
+	//energyFile = fopen("energyT3.data","w");	// between runs at different temperatures
 	fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, potentialEnergy, kineticEnergy);
 
 	FILE *ptFile;
@@ -198,6 +194,8 @@ int main()
 			fflush(stdout);
 		}
 	}	// End of equilibration loop
+
+// End of equilibration, start of production
 
 	printf("\tDone!\nProduction\t");
 	
@@ -322,26 +320,14 @@ int main()
 
 	printf("\tDone!\nCleaning up\n");
 
-	// The production part of the simulation is now done.
-	// The code below forms some averages and other stuff that
-	// is best done with all data on hand
+// The production part of the simulation is now done.
+// The code below forms some averages and other stuff that
+// is best done with all data on hand
 
 	FILE *valuesFile;		// For saving various values (non-array data)
 	valuesFile = fopen("values.data","w");
 	
 	nAverageSteps = nProductionSteps-maxCorrelationSteps;	// number of steps over which to take averages
-	
-	meanTemperature = meanTemperature/nAverageSteps;
-	meanSquareTemperature = meanSquareTemperature/nAverageSteps;
-	meanPressure = meanPressure/nAverageSteps;
-	meanSquarePressure = meanSquarePressure/nAverageSteps;
-	fprintf(valuesFile,"%e \t %e \t %e \t %e \t", meanTemperature, meanSquareTemperature, meanPressure, meanSquarePressure);
-
-	//The last step to calculate the mean values of meanTemperature_ik & meanPressure_ik.
-	for(i = 0; i < maxCorrelationSteps+1; i++){
-		meanTemperature_ik[i] = meanTemperature_ik[i]/nAverageSteps;
-		meanPressure_ik[i] = meanPressure_ik[i]/nAverageSteps;
-	}
 	
 	FILE *msdFile;
 	msdFile = fopen("msd3.data","w");
@@ -361,7 +347,7 @@ int main()
 		msdDiffCoeff += 1.0/(6*i*timestep)*meanDistanceAverage[i];
 	}
 	msdDiffCoeff = msdDiffCoeff / msdAverageSteps;
-	fprintf(valuesFile,"msd DiffCoeff = %e \n", msdDiffCoeff);
+	fprintf(valuesFile,"%e\tDiffusion coeff (MSD)\n", msdDiffCoeff);
 
 	// Final processing and saving of velocity correlation function and diffusion coeff from time integral
 	FILE *velcorFile;
@@ -382,7 +368,7 @@ int main()
 	}
 
 	diffusionCoefficient = (1.0/3.0) * diffusionCoefficient / maxCorrelationSteps;
-	fprintf(valuesFile,"diffCoeff = %e \n", diffusionCoefficient);
+	fprintf(valuesFile,"%e\tDiffusion coeff (time integral)\n", diffusionCoefficient);
 
 	// Calculating and saving spectrum integral thingy
 	FILE *spectrumFile;
@@ -397,9 +383,20 @@ int main()
 		fprintf(spectrumFile,"%e \t %e \n",i*spectrumInterval/nSpectrumPoints,spectrum[i]);
 	}
 
-	//Calculates phi
+	// Setting up for calculating correlation data for temperature and pressure
+	meanTemperature = meanTemperature/nAverageSteps;
+	meanSquareTemperature = meanSquareTemperature/nAverageSteps;
+	meanPressure = meanPressure/nAverageSteps;
+	meanSquarePressure = meanSquarePressure/nAverageSteps;
+
 	meanTemperatureSquare = meanTemperature*meanTemperature;
 	meanPressureSquare = meanPressure*meanPressure;
+
+	for(i = 0; i < maxCorrelationSteps+1; i++){
+		meanTemperature_ik[i] = meanTemperature_ik[i]/nAverageSteps;
+		meanPressure_ik[i] = meanPressure_ik[i]/nAverageSteps;
+	}
+
 
 	// Correlation data for temperature and pressure
 	FILE *phiTFile;
@@ -407,6 +404,7 @@ int main()
 
 	FILE *phiPFile;
 	phiPFile = fopen("phiPressure.data","w");
+	
 	for(i = 0; i<maxCorrelationSteps; i++){
 		phiTemperature[i] = (meanTemperature_ik[i] - meanTemperatureSquare)/(meanSquareTemperature - meanTemperatureSquare);
 		phiPressure[i] = (meanPressure_ik[i] - meanPressureSquare)/(meanSquarePressure - meanPressureSquare);
@@ -446,13 +444,11 @@ int main()
 
 	varTemperature = varTemperature*sTemperature/nProductionSteps;
 	varPressure = varPressure*sPressure/nProductionSteps;
-	fprintf(valuesFile,"sTemperature= %e \t sPressure= %e \nVAR[temp]= %e \t VAR[P]= %e \n",sTemperature, sPressure, varTemperature, varPressure);
+	fprintf(valuesFile,"%e\tsTemperature\n", sTemperature);
+	fprintf(valuesFile,"%e\tsPressure\n", sPressure);
+	fprintf(valuesFile,"%e\tvarTemperature\n", varTemperature);
+	fprintf(valuesFile,"%e\tvarPressure\n",varPressure);
 	
-	fprintf(valuesFile,"Ds-int\n");
-	fprintf(valuesFile,"%e \t",diffusionCoefficient);
-	fprintf(valuesFile,"\n");
-	close(valuesFile);
-
 	FILE *donefile;				// Just an empty file to indicate that program is done
 	donefile = fopen("done.data", "w");	// useful when using ssh+screen for running simulations
 	fprintf(donefile, "done");
