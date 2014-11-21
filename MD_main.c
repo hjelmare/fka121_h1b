@@ -363,6 +363,14 @@ printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSq
 		fprintf(msdFile, "%e\t%e\n", i*timestep, meanDistanceAverage[i]);
 	}
 
+	// Diffusion coeff from MSD -- NEEDS CLEANUP!!!!!!!!
+	double msdDiffCoeff = 0;
+	for (i = maxCorrelationSteps - 50; i < maxCorrelationSteps; i++) {
+		msdDiffCoeff += 1.0/(6*i*timestep)*meanDistanceAverage[i];
+	}
+	msdDiffCoeff = msdDiffCoeff / 50;
+	printf("msd DiffCoeff = %e \n", msdDiffCoeff);
+
 	// Final processing and saving of velocity correlation function
 	FILE *velcorFile;
 	velcorFile = fopen("velcor.data","w");
@@ -382,7 +390,7 @@ printf("%e \t %e \t %e \t %e \n", meanTemp, meanSquareTemp, meanPressure, meanSq
 	}
 
 	diffusionCoefficient = (1.0/3.0) * diffusionCoefficient / maxCorrelationSteps;
-//	printf("diffCoeff = %e \n", diffusionCoefficient);
+	printf("diffCoeff = %e \n", diffusionCoefficient);
 
 	// Calculating and saving spectrum integral thingy, finding diffusion coeff from time integral
 	FILE *spectrumFile;
