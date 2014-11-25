@@ -40,6 +40,7 @@ int main()
   double wantedTemperature = 500+273;   // Target temperature
   wantedTemperature = 700+273;
 //  wantedTemperature = 900+273;
+  double wantedTemperature2 = 900+273;
   double wantedPressure =  6.32420934* 0.0000001; // 1 atm in metal units
   double mass = 0.00279636;  // 26.9815 u * 1.0364 * 0.0001
   double latticeParameter = 4.05;
@@ -140,7 +141,72 @@ int main()
   }
   printf("\tDone!\nEquilibration\t");
 
-  for (i=0;i<nEquilibrationSteps;i++) {   // Start of equilibration loop
+  for (i=0;i<nEquilibrationSteps;i++) {   // Start of equilibration loop--------------------------------------------------------------------------------------------------------------
+    // Update velocities and positions
+    for (j=0; j<nParticles; j++) {
+      for (k = 0; k<dim; k++) {
+        vel[j][k] = vel[j][k] + 0.5*timestep*force[j][k] / mass;
+        pos[j][k] = pos[j][k] + timestep*vel[j][k];
+      }
+    }
+
+    // Calculate forces so that we can take the next half step
+    get_forces_AL(force, pos, nCells*latticeParameter, nParticles);
+
+    // Update velocities again
+    for (j=0; j<nParticles; j++) {
+      for (k=0; k<dim; k++) {
+        vel[j][k] = vel[j][k] + 0.5*timestep*force[j][k] / mass;
+      }
+    }
+    
+    // Calculating energies
+    potentialEnergy = get_energy_AL(pos, nCells*latticeParameter, \
+    nParticles);
+    kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
+    energy = potentialEnergy + kineticEnergy;
+    fprintf(energyFile,"%e \t %e \t %e \t %e \n", (i+1)*timestep, energy, \
+    potentialEnergy, kineticEnergy);    
+
+    // Get temperature and pressure
+    currentTemperature = GetInstantTemperature(vel, nParticles, mass, dim);
+
+    volume = pow(nCells*latticeParameter, 3);
+    virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
+    currentPressure = GetPressure(currentTemperature, volume, virial, \
+    nParticles);
+
+    fprintf(ptFile, "%e \t %e \t %e \t %e \n", (i+1)*timestep, currentPressure, \
+    currentTemperature, latticeParameter);
+
+    // Calculate scaling parameters for equilibration
+    alphaT = GetAlphaT(wantedTemperature2, currentTemperature, timestep, \
+    timeConstantT);
+    alphaP = GetAlphaP(wantedPressure, currentPressure, timestep, \
+    timeConstantP);
+    sqrtAlphaT = sqrt(alphaT);
+    curtAlphaP = pow(alphaP, 1.0 / 3);
+
+    // Rescale velocity and position
+    latticeParameter = latticeParameter * curtAlphaP;
+    for (j=0; j<nParticles; j++) {
+      for (k=0; k<dim; k++) {
+        vel[j][k] = vel[j][k] * sqrtAlphaT;
+        pos[j][k] = pos[j][k] * curtAlphaP;
+      }
+    }
+//-Extra get_forces here... not sure we should be doing it twice per step, but it works...    
+    // Calculate forces so that we can take the next half step
+    get_forces_AL(force, pos, nCells*latticeParameter, nParticles);
+
+    if( i % 100 == 0) {   // Progress indicator
+      printf("I");
+      fflush(stdout);
+    }
+  } // End of equilibration loop
+
+// End of equilibration, start of production--------------------------------------------------------------------------------------------------------------------------------------------
+  for (i=0;i<nEquilibrationSteps;i++) {   // Start of equilibration loop 2--------------------------------------------------------------------------------------------------------------
     // Update velocities and positions
     for (j=0; j<nParticles; j++) {
       for (k = 0; k<dim; k++) {
@@ -204,7 +270,7 @@ int main()
     }
   } // End of equilibration loop
 
-// End of equilibration, start of production
+// End of equilibration, start of production--------------------------------------------------------------------------------------------------------------------------------------------
 
   FILE *positionFile;
   positionFile = fopen("position.data","w");
