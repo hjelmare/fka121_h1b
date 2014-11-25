@@ -1,3 +1,93 @@
+%% Equilibration - T & P
+
+clear all
+clc
+clf
+
+
+data = importdata('pt.data');
+pressure = data(:,2);
+temp = data(:,3);
+latpar = data(:,4);
+
+textStorlek = 14;
+legendStorlek = 11;
+
+
+subplot(2,1,1)
+hold on
+plot(data(:,1), temp, 'b');
+plot(data(:,1), (latpar-4.05)*10000, 'r');
+xlabel('time [ps]', 'FontSize',textStorlek);
+
+
+subplot(2,1,2)
+hold on
+plot(data(:,1), pressure, 'g');
+xlabel('time [ps]', 'FontSize',textStorlek);
+
+
+useFrom = 0.6;
+start = fix(length(pressure)*useFrom);
+
+meanTemp = mean(temp(start:end))
+meanPress = mean(pressure(start:end))
+
+%% MSD function
+
+clear all
+clc
+clf
+
+data = importdata('msd.data');
+
+textStorlek = 14;
+legendStorlek = 11;
+
+hold on
+plot(data(:,1),data(:,2), 'b');
+
+ylabel('MSD ', 'FontSize',textStorlek)
+xlabel('\Delta t [ps]', 'FontSize',textStorlek)
+
+%% Plot positions (3D-plot) of one particle
+clear all
+clf
+clc
+pos1 = importdata('position.data');
+
+textStorlek = 14;
+legendStorlek = 11;
+
+hold on
+plot3(pos1(:,2), pos1(:,3),pos1(:,4),'b');
+
+xlabel('[Å]', 'FontSize',textStorlek);
+ylabel('[Å]', 'FontSize',textStorlek);
+zlabel('[Å]', 'FontSize',textStorlek);
+
+
+%% Velocity correlation function
+
+clear all
+clc
+clf
+
+textStorlek = 14;
+legendStorlek = 11;
+
+data = importdata('velcor.data');
+
+hold on
+plot(data(:,1),data(:,2),'b.')
+
+ylabel('Velocity correlation [(Å/ps^2)^2]','FontSize',textStorlek)
+xlabel('\Delta t [ps]','FontSize',textStorlek)
+
+
+%% bla blah
+
+
 % in some places, data for several temperatures is required
 % so you need to run the main program several times with
 % different temperature settings and manually rename data files
@@ -59,85 +149,6 @@ set(text, 'FontSize', legendStorlek);
 title('Kinetic energy', 'FontSize',textStorlek);
 ylabel('energy [eV]', 'FontSize',textStorlek);
 xlabel('time [ps]', 'FontSize',textStorlek);
-%% Equilibration - T & P
-data = importdata('pt500.data');
-temp500 = data(:,2);
-pressure500 = data(:,3);
-
-data = importdata('pt700.data');
-temp700 = data(:,2);
-pressure700 = data(:,3);
-
-textStorlek = 14;
-legendStorlek = 11;
-
-
-hold on
-subplot(2,1,1);
-plot(data(:,1), pressure500, 'g');
-text  = legend('Pressure');
-set(text, 'FontSize', legendStorlek);
-ylabel('Pressure [eV/Å^{3}]', 'FontSize',textStorlek);
-xlabel('time [ps]', 'FontSize',textStorlek);
-
-hold on
-
-subplot(2,1,2);
-plot(data(:,1), temp500, 'b');
-text = legend('Temperature');
-set(text, 'FontSize', legendStorlek);
-ylabel('temperature [K]', 'FontSize',textStorlek);
-xlabel('time [ps]', 'FontSize',textStorlek);
-
-figure
-hold on
-subplot(2,1,1);
-plot(data(:,1), pressure700, 'g');
-text  = legend('Pressure');
-set(text, 'FontSize', legendStorlek);
-ylabel('Pressure [eV/Å^{3}]', 'FontSize',textStorlek);
-xlabel('time [ps]', 'FontSize',textStorlek);
-
-hold on
-
-subplot(2,1,2);
-plot(data(:,1), temp700, 'b');
-text = legend('Temperature');
-set(text, 'FontSize', legendStorlek);
-ylabel('temperature [K]', 'FontSize',textStorlek);
-xlabel('time [ps]', 'FontSize',textStorlek);
-
-useFrom = 0.6;
-start = fix(length(energy)*useFrom);
-
-meanTemp = mean(temp(start:end))
-meanPress = mean(pressure(start:end))
-
-%% Velocity correlation function
-
-clear all
-clc
-clf
-
-textStorlek = 14;
-legendStorlek = 11;
-
-data_500 = importdata('velcor_500.data');
-data_700 = importdata('velcor_700.data');
-data_900 = importdata('velcor_900.data');
-
-hold on
-plot(data_500(:,1),data_500(:,2),'b')
-plot(data_700(:,1),data_700(:,2),'g.')
-plot(data_900(:,1),data_900(:,2),'r--')
-
-ylabel('Velocity correlation [(Å/ps^2)^2]','FontSize',textStorlek)
-xlabel('\Delta t [ps]','FontSize',textStorlek)
-
-text = legend('T = 773 K', 'T = 973 K', 'T = 1173 K');
-set(text, 'FontSize', legendStorlek);
-
-saveas(gcf,'velcor.png','png')
 
 %% Spectrum analysis
 
@@ -165,50 +176,4 @@ text = legend('T = 773 K', 'T = 973 K', 'T = 1173 K');
 set(text, 'FontSize', legendStorlek);
 
 saveas(gcf,'spectrum.png','png')
-
-%% MSD function
-
-clear all
-clc
-clf
-
-%data = importdata('msd.data');
-%data2 = importdata('msd2.data');
-data3 = importdata('msd3.data');
-
-textStorlek = 14;
-legendStorlek = 11;
-
-hold on
-%plot(data(:,1),data(:,2), 'b');
-%plot(data2(:,1),data2(:,2),'r--');
-plot(data3(:,1),data3(:,2),'g.');
-
-ylabel('MSD ', 'FontSize',textStorlek)
-xlabel('\Delta t [ps]', 'FontSize',textStorlek)
-text = legend('T=773K', 'T=973', 'T=1173K');
-set(text, 'FontSize', legendStorlek);
-
-saveas(gcf,'MSD.png','png')
-
-%% Plot positions (3D-plot) of one particle
-clear all
-clc
-pos1 = importdata('position.data');
-%pos2 = importdata('position2.data');
-%pos3 = importdata('position3.data');
-
-textStorlek = 14;
-legendStorlek = 11;
-
-hold on
-plot3(pos1(:,2), pos1(:,3),pos1(:,4),'b');
-%plot3(pos2(:,2), pos2(:,3),pos2(:,4),'g.');
-%plot3(pos3(:,2), pos3(:,3),pos3(:,4),'r.-');
-text = legend('T=773K', 'T=973K', 'T=1173K');
-set(text, 'FontSize', legendStorlek);
-
-xlabel('[Å]', 'FontSize',textStorlek);
-ylabel('[Å]', 'FontSize',textStorlek);
-zlabel('[Å]', 'FontSize',textStorlek);
 

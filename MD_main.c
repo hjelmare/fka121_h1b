@@ -15,8 +15,8 @@ int main()
 {
   // REMEMBER: \m/ METAL UNITS \m/
   // simulation settings
-  double productionTime = 5;
-  double equilibrationTime = 5;
+  double equilibrationTime = 25;
+  double productionTime = 25;
   double timestep = 0.01;
 //  timestep = 0.1;
 //  timestep = 0.001;
@@ -30,6 +30,8 @@ int main()
   
   double timeConstantT = 0.02;
   double timeConstantP = 0.05;
+  timeConstantT = 1;
+  timeConstantP = timeConstantT;
 
   // physical parameters
   int dim = 3;    // do not change
@@ -58,7 +60,6 @@ int main()
   double savedValuesP[maxCorrelationSteps];
   double meanValuesP[maxCorrelationSteps];
   double energy, potentialEnergy, kineticEnergy;
-  double siquare_root_of_alpha;
   double alphaT = 1;
   double alphaP = 1;
   double currentTemperature;
@@ -121,17 +122,16 @@ int main()
   kineticEnergy = GetKineticEnergy(vel, mass, nParticles);
   energy = potentialEnergy + kineticEnergy;
 
-
   // Saving initial energies on the first line in the file
   FILE *energyFile;
   energyFile = fopen("energy.data","w");
   fprintf(energyFile, "%e \t %e \t %e \t %e \n", 0.0, energy, \
   potentialEnergy, kineticEnergy);
 
+// Initialization is done, moving on to equilibration
+
   FILE *ptFile;
   ptFile = fopen("pt.data","w");
-
-// Initialization is done, moving on to equilibration
 
   printf("\t"); // Progress indicator stuff
   for (i = 0; i < ( nEquilibrationSteps > nProductionSteps  ? \
@@ -148,6 +148,16 @@ int main()
         pos[j][k] = pos[j][k] + timestep*vel[j][k];
       }
     }
+
+    // Calculate forces so that we can take the next half step
+    get_forces_AL(force, pos, nCells*latticeParameter, nParticles);
+
+    // Update velocities again
+    for (j=0; j<nParticles; j++) {
+      for (k=0; k<dim; k++) {
+        vel[j][k] = vel[j][k] + 0.5*timestep*force[j][k] / mass;
+      }
+    }
     
     // Calculating energies
     potentialEnergy = get_energy_AL(pos, nCells*latticeParameter, \
@@ -159,12 +169,14 @@ int main()
 
     // Get temperature and pressure
     currentTemperature = GetInstantTemperature(vel, nParticles, mass, dim);
+
     volume = pow(nCells*latticeParameter, 3);
     virial = get_virial_AL(pos, nCells*latticeParameter, nParticles);
     currentPressure = GetPressure(currentTemperature, volume, virial, \
     nParticles);
-    fprintf(ptFile, "%e \t %e \t %e \n", (i+1)*timestep, currentTemperature, \
-    currentPressure);
+
+    fprintf(ptFile, "%e \t %e \t %e \t %e \n", (i+1)*timestep, currentPressure, \
+    currentTemperature, latticeParameter);
 
     // Calculate scaling parameters for equilibration
     alphaT = GetAlphaT(wantedTemperature, currentTemperature, timestep, \
@@ -182,16 +194,9 @@ int main()
         pos[j][k] = pos[j][k] * curtAlphaP;
       }
     }
-
+//-Extra get_forces here... not sure we should be doing it twice per step, but it works...    
     // Calculate forces so that we can take the next half step
     get_forces_AL(force, pos, nCells*latticeParameter, nParticles);
-
-    // Update velocities again
-    for (j=0; j<nParticles; j++) {
-      for (k=0; k<dim; k++) {
-        vel[j][k] = vel[j][k] + 0.5*timestep*force[j][k] / mass;
-      }
-    }
 
     if( i % 100 == 0) {   // Progress indicator
       printf("I");
@@ -343,7 +348,7 @@ int main()
       // take averages over this many steps
   
   FILE *msdFile;
-  msdFile = fopen("msd3.data","w");
+  msdFile = fopen("msd.data","w");
 
   for( i = 0; i < maxCorrelationSteps; i++) {
     meanDistanceAverage[i] = 0;

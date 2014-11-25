@@ -44,8 +44,6 @@ int nParticles)
 
 double GetInstantTemperature(double vel [][3], int nParticles, \
 double mass, int dim)
-
-
 {
   double temperature = 0;
   int i,j;
