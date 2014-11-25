@@ -36,7 +36,7 @@ int main()
   int nCells = 4;
   int nParticles = 4*pow(nCells,dim);
   double wantedTemperature = 500+273;   // Target temperature
-  wantedTemperature = 700+273;
+//  wantedTemperature = 700+273;
 //  wantedTemperature = 900+273;
   double wantedPressure =  6.32420934* 0.0000001; // 1 atm in metal units
   double mass = 0.00279636;  // 26.9815 u * 1.0364 * 0.0001
@@ -131,6 +131,9 @@ int main()
   FILE *ptFile;
   ptFile = fopen("pt.data","w");
 
+  FILE *positionFile;
+  positionFile = fopen("position.data","w");
+
 // Initialization is done, moving on to equilibration
 
   printf("\t"); // Progress indicator stuff
@@ -149,6 +152,16 @@ int main()
       }
     }
     
+    // Calculate forces so that we can take the next half step
+    get_forces_AL(force, pos, nCells*latticeParameter, nParticles);
+
+    // Update velocities again
+    for (j=0; j<nParticles; j++) {
+      for (k=0; k<dim; k++) {
+        vel[j][k] = vel[j][k] + 0.5*timestep*force[j][k] / mass;
+      }
+    }
+
     // Calculating energies
     potentialEnergy = get_energy_AL(pos, nCells*latticeParameter, \
     nParticles);
@@ -182,17 +195,6 @@ int main()
         pos[j][k] = pos[j][k] * curtAlphaP;
       }
     }
-
-    // Calculate forces so that we can take the next half step
-    get_forces_AL(force, pos, nCells*latticeParameter, nParticles);
-
-    // Update velocities again
-    for (j=0; j<nParticles; j++) {
-      for (k=0; k<dim; k++) {
-        vel[j][k] = vel[j][k] + 0.5*timestep*force[j][k] / mass;
-      }
-    }
-
     if( i % 100 == 0) {   // Progress indicator
       printf("I");
       fflush(stdout);
@@ -201,8 +203,6 @@ int main()
 
 // End of equilibration, start of production
 
-  FILE *positionFile;
-  positionFile = fopen("position.data","w");
   printf("\tDone!\nProduction\t");
   
   for (i=0;i<nProductionSteps;i++) {

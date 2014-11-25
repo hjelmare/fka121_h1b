@@ -172,17 +172,19 @@ clear all
 clc
 clf
 
-%data = importdata('msd.data');
-%data2 = importdata('msd2.data');
+data = importdata('msd.data');
+data2 = importdata('msd2.data');
 data3 = importdata('msd3.data');
 
 textStorlek = 14;
 legendStorlek = 11;
 
 hold on
-%plot(data(:,1),data(:,2), 'b');
-%plot(data2(:,1),data2(:,2),'r--');
+plot(data(:,1),data(:,2), 'b');
 plot(data3(:,1),data3(:,2),'g.');
+plot(data2(:,1),data2(:,2),'r--');
+
+
 
 ylabel('MSD ', 'FontSize',textStorlek)
 xlabel('\Delta t [ps]', 'FontSize',textStorlek)
@@ -194,17 +196,17 @@ saveas(gcf,'MSD.png','png')
 %% Plot positions (3D-plot) of one particle
 clear all
 clc
-pos1 = importdata('position.data');
-%pos2 = importdata('position2.data');
-%pos3 = importdata('position3.data');
+pos1 = importdata('position1.data');
+pos2 = importdata('position2.data');
+pos3 = importdata('position3.data');
 
 textStorlek = 14;
 legendStorlek = 11;
 
 hold on
 plot3(pos1(:,2), pos1(:,3),pos1(:,4),'b');
-%plot3(pos2(:,2), pos2(:,3),pos2(:,4),'g.');
-%plot3(pos3(:,2), pos3(:,3),pos3(:,4),'r.-');
+plot3(pos2(:,2), pos2(:,3),pos2(:,4),'g.');
+plot3(pos3(:,2), pos3(:,3),pos3(:,4),'r.-');
 text = legend('T=773K', 'T=973K', 'T=1173K');
 set(text, 'FontSize', legendStorlek);
 
