@@ -16,17 +16,17 @@ int main()
   // REMEMBER: \m/ METAL UNITS \m/
   // simulation settings
   double equilibrationTime = 25;
-  double productionTime = 25;
+  double productionTime = 1;
   double timestep = 0.01;
-  //timestep = 0.1;
-  timestep = 0.001;
+//  timestep = 0.001;
+//  timestep = 0.0001;
 
   double msdAverageSteps = 50;
     
   int nSpectrumPoints = 1000;
   double spectrumInterval = PI;
   
-  double maxCorrelationTime = 0.3;
+  double maxCorrelationTime = 0.01;
   
   double timeConstantT = 1;
   double timeConstantP = 1;
@@ -36,7 +36,7 @@ int main()
   int nCells = 4;
   int nParticles = 4*pow(nCells,dim);
   double wantedTemperature = 500+273;   // Target temperature
-  wantedTemperature = 700+273;
+//  wantedTemperature = 700+273;
 //  wantedTemperature = 900+273;
   double wantedTemperature2 = 1200+273;
   double wantedPressure =  6.32420934* 0.0000001; // 1 atm in metal units
