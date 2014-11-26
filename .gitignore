@@ -6,7 +6,6 @@
 MD
 
 # Data files
-*.data
 *.eps
 
 # Temp files
