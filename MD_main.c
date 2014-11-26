@@ -18,15 +18,15 @@ int main()
   double equilibrationTime = 25;
   double productionTime = 25;
   double timestep = 0.01;
-//  timestep = 0.1;
-//  timestep = 0.001;
+  //timestep = 0.1;
+  //timestep = 0.001;
 
   double msdAverageSteps = 50;
     
   int nSpectrumPoints = 1000;
   double spectrumInterval = PI;
   
-  double maxCorrelationTime = 1;
+  double maxCorrelationTime = 1.0;
   
   double timeConstantT = 0.02;
   double timeConstantP = 0.05;
@@ -38,7 +38,7 @@ int main()
   int nCells = 4;
   int nParticles = 4*pow(nCells,dim);
   double wantedTemperature = 500+273;   // Target temperature
-  wantedTemperature = 700+273;
+  //wantedTemperature = 700+273;
 //  wantedTemperature = 900+273;
   double wantedTemperature2 = 900+273;
   double wantedPressure =  6.32420934* 0.0000001; // 1 atm in metal units
@@ -132,7 +132,7 @@ int main()
 // Initialization is done, moving on to equilibration
 
   FILE *ptFile;
-  ptFile = fopen("pt.data","w");
+  ptFile = fopen("pt700.data","w");
 
   printf("\t"); // Progress indicator stuff
   for (i = 0; i < ( nEquilibrationSteps > nProductionSteps  ? \
@@ -140,7 +140,7 @@ int main()
       printf(".");
   }
   printf("\tDone!\nEquilibration\t");
-
+///*
   for (i=0;i<nEquilibrationSteps;i++) {   // Start of equilibration loop--------------------------------------------------------------------------------------------------------------
     // Update velocities and positions
     for (j=0; j<nParticles; j++) {
@@ -204,9 +204,10 @@ int main()
       fflush(stdout);
     }
   } // End of equilibration loop
-
+//*/
 // End of equilibration, start of production--------------------------------------------------------------------------------------------------------------------------------------------
-  for (i=0;i<nEquilibrationSteps;i++) {   // Start of equilibration loop 2--------------------------------------------------------------------------------------------------------------
+   // Start of equilibration loop 2--------------------------------------------------------------------------------------------------------------
+  for (i=0;i<nEquilibrationSteps;i++) {    
     // Update velocities and positions
     for (j=0; j<nParticles; j++) {
       for (k = 0; k<dim; k++) {
@@ -276,6 +277,7 @@ int main()
   positionFile = fopen("position.data","w");
   printf("\tDone!\nProduction\t");
   
+
   for (i=0;i<nProductionSteps;i++) {
     // Save positions of one particle to check whether the
     // aluminium is solid or liquid
@@ -487,6 +489,8 @@ int main()
     meanPressure_ik[i] = meanPressure_ik[i]/nAverageSteps;
   }
 
+  fprintf(valuesFile, "%e\t Mean Temperature\n", meanTemperature);
+  fprintf(valuesFile,"%e\t Mean Pressure\n", meanPressure);
 
   // Correlation data for temperature and pressure
   FILE *phiTFile;

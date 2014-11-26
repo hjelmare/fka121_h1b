@@ -24,41 +24,80 @@ energy3 = data(:,2);
 potentialEnergy3 = data(:,3);
 kineticEnergy3 = data(:,4);
 
-
-
 %%
+figure
+
 textStorlek = 14;
 legendStorlek = 11;
-subplot(3,1,1)
+subplot(2,1,1)
 hold on
-plot(time1, energy1, 'b');
-plot(time2, energy2, 'g.');
+plot(time1, energy1, 'b.-');
+plot(time2, energy2, 'g');
 plot(time3, energy3, 'r--');
 text =legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
 set(text, 'FontSize', legendStorlek);
 title('Total energy', 'FontSize',textStorlek)
 ylabel('energy [eV]', 'FontSize', textStorlek);
 xlabel('time [ps]', 'FontSize',textStorlek);
-subplot(3,1,2)
+
+subplot(2,1,2)
 hold on
-plot(time1, potentialEnergy1, 'b');
-plot(time2, potentialEnergy2, 'g.');
+plot(time2, energy2, 'g');
+plot(time3, energy3, 'r--');
+text =legend('timestep = 0.01', 'timestep = 0.001');
+set(text, 'FontSize', legendStorlek);
+title('Total energy', 'FontSize',textStorlek)
+ylabel('energy [eV]', 'FontSize', textStorlek);
+xlabel('time [ps]', 'FontSize',textStorlek);
+
+% potential
+figure
+subplot(2,1,1)
+hold on
+plot(time1, potentialEnergy1, 'b.-');
+b = plot(time2, potentialEnergy2, 'g');
 plot(time3, potentialEnergy3, 'r--');
 text = legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
 set(text, 'FontSize', legendStorlek);
 title('Potential energy', 'FontSize',textStorlek);
 ylabel('energy [eV]', 'FontSize',textStorlek);
 xlabel('time [ps]', 'FontSize',textStorlek);
-subplot(3,1,3)
+
+subplot(2,1,2)
 hold on
-plot(time1, kineticEnergy1, 'b');
-plot(time2, kineticEnergy2, 'g.');
+plot(time2, potentialEnergy2, 'g');
+plot(time3, potentialEnergy3, 'r--');
+text =legend('timestep = 0.01', 'timestep = 0.001');
+set(text, 'FontSize', legendStorlek);
+title('Potential energy', 'FontSize',textStorlek)
+ylabel('energy [eV]', 'FontSize', textStorlek);
+xlabel('time [ps]', 'FontSize',textStorlek);
+
+% Kinetik
+figure
+
+subplot(2,1,1)
+hold on
+plot(time1, kineticEnergy1, 'b.-');
+c = plot(time2, kineticEnergy2, 'g');
 plot(time3, kineticEnergy3, 'r--');
 text = legend('timestep = 0.1', 'timestep = 0.01', 'timestep = 0.001');
 set(text, 'FontSize', legendStorlek);
 title('Kinetic energy', 'FontSize',textStorlek);
 ylabel('energy [eV]', 'FontSize',textStorlek);
 xlabel('time [ps]', 'FontSize',textStorlek);
+
+subplot(2,1,2)
+hold on
+plot(time2, kineticEnergy2, 'g');
+plot(time3, kineticEnergy3, 'r--');
+text =legend('timestep = 0.01', 'timestep = 0.001');
+set(text, 'FontSize', legendStorlek);
+title('Kinetic energy', 'FontSize',textStorlek)
+ylabel('energy [eV]', 'FontSize', textStorlek);
+xlabel('time [ps]', 'FontSize',textStorlek);
+
+%set(a, 'markers', 12)
 %% Equilibration - T & P
 data = importdata('pt500.data');
 temp500 = data(:,2);
