@@ -99,22 +99,40 @@ xlabel('time [ps]', 'FontSize',textStorlek);
 
 %set(a, 'markers', 12)
 %% Equilibration - T & P
+clc
+scaleLatPar = 0.1;
+
 data = importdata('pt500.data');
-temp500 = data(:,2);
-pressure500 = data(:,3);
+pressure500 = data(:,2);
+temp500 = data(:,3);
+latpar500 = data(:,4);
+
+time_1 = data(1:end/2,1);
+time_2 = data(end/2:end,1);
+
+latpar500_1 = latpar500(1:end/2);
+latpar500_2 = latpar500(end/2:end);
+
+press500_1 = pressure500(1:end/2);
+press500_2 = pressure500(end/2:end);
 
 data = importdata('pt700.data');
-temp700 = data(:,2);
-pressure700 = data(:,3);
+pressure700 = data(:,2);
+temp700 = data(:,3);
+latpar700 = data(:,4);
 
 textStorlek = 14;
 legendStorlek = 11;
 
-
-hold on
 subplot(2,1,1);
-plot(data(:,1), pressure500, 'g');
-text  = legend('Pressure');
+hold on
+%plot(data(:,1), pressure500, 'r--');
+plot(time_1, press500_1, 'r--');
+plot(time_2, press500_2, 'g--');
+%plot(data(:,1), (latpar500_1-4.05)*scaleLatPar,'b');
+plot(time_1, (latpar500_1-4.05)*scaleLatPar,'r');
+plot(time_2, (latpar500_2-4.05)*scaleLatPar,'g');
+text  = legend('Pressure','Lattice parameter');
 set(text, 'FontSize', legendStorlek);
 ylabel('Pressure [eV/Å^{3}]', 'FontSize',textStorlek);
 xlabel('time [ps]', 'FontSize',textStorlek);
@@ -122,16 +140,17 @@ xlabel('time [ps]', 'FontSize',textStorlek);
 hold on
 
 subplot(2,1,2);
-plot(data(:,1), temp500, 'b');
+plot(data(:,1), temp500, 'b:');
 text = legend('Temperature');
 set(text, 'FontSize', legendStorlek);
 ylabel('temperature [K]', 'FontSize',textStorlek);
 xlabel('time [ps]', 'FontSize',textStorlek);
 
 figure
-hold on
 subplot(2,1,1);
+hold on
 plot(data(:,1), pressure700, 'g');
+plot(data(:,1), (latpar700-4.05)*scaleLatPar,'b');
 text  = legend('Pressure');
 set(text, 'FontSize', legendStorlek);
 ylabel('Pressure [eV/Å^{3}]', 'FontSize',textStorlek);
@@ -161,14 +180,14 @@ clf
 textStorlek = 14;
 legendStorlek = 11;
 
-data_500 = importdata('velcor_500.data');
-data_700 = importdata('velcor_700.data');
-data_900 = importdata('velcor_900.data');
+data_500 = importdata('velcor500.data');
+data_700 = importdata('velcor700.data');
+%data_900 = importdata('velcor900.data');
 
 hold on
 plot(data_500(:,1),data_500(:,2),'b')
 plot(data_700(:,1),data_700(:,2),'g.')
-plot(data_900(:,1),data_900(:,2),'r--')
+%plot(data_900(:,1),data_900(:,2),'r--')
 
 ylabel('Velocity correlation [(Å/ps^2)^2]','FontSize',textStorlek)
 xlabel('\Delta t [ps]','FontSize',textStorlek)
@@ -187,14 +206,14 @@ clf
 textStorlek = 14;
 legendStorlek = 11;
 
-data_500 = importdata('spectrum_500.data');
-data_700 = importdata('spectrum_700.data');
-data_900 = importdata('spectrum_900.data');
+data_500 = importdata('spectrum500.data');
+data_700 = importdata('spectrum700.data');
+%data_900 = importdata('spectrum_900.data');
 
 hold on
 plot(data_500(:,1),data_500(:,2),'b')
 plot(data_700(:,1),data_700(:,2),'g.')
-plot(data_900(:,1),data_900(:,2),'r--')
+%plot(data_900(:,1),data_900(:,2),'r--')
 
 ylabel('Spectrum of velocity correlation function [(Å/ps^2)^2]', ...
     'FontSize',textStorlek)

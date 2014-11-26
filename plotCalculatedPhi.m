@@ -3,7 +3,7 @@ clear all
 clc
 
 phiP = importdata('phiPressure.data');
-phiT = importdata('phiTemp.data');
+phiT = importdata('phiTemperature.data');
 
 
 plot(phiT(:,1), phiT(:,2), 'b');
@@ -21,10 +21,6 @@ clc
 pos1 = importdata('position1.data');
 pos2 = importdata('position2.data');
 pos3 = importdata('position3.data');
-<<<<<<< HEAD
-=======
-
->>>>>>> fc889f6b05cf692861d44aa2b72b54e584d117e4
 
 textStorlek = 14;
 legendStorlek = 11;
