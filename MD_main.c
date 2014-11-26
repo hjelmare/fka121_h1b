@@ -15,8 +15,8 @@ int main()
 {
   // REMEMBER: \m/ METAL UNITS \m/
   // simulation settings
-  double equilibrationTime = 25;
-  double productionTime = 25;
+  double equilibrationTime = 50;
+  double productionTime = 50;
   double timestep = 0.01;
 //  timestep = 0.1;
 //  timestep = 0.001;
