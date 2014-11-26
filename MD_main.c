@@ -19,20 +19,18 @@ int main()
   double productionTime = 25;
   double timestep = 0.01;
   //timestep = 0.1;
-  //timestep = 0.001;
+  timestep = 0.001;
 
   double msdAverageSteps = 50;
     
   int nSpectrumPoints = 1000;
   double spectrumInterval = PI;
   
-  double maxCorrelationTime = 1.0;
+  double maxCorrelationTime = 0.3;
   
-  double timeConstantT = 0.02;
-  double timeConstantP = 0.05;
-  timeConstantT = 1;
-  timeConstantP = timeConstantT;
-
+  double timeConstantT = 1;
+  double timeConstantP = 1;
+  
   // physical parameters
   int dim = 3;    // do not change
   int nCells = 4;
@@ -274,7 +272,7 @@ int main()
 // End of equilibration, start of production--------------------------------------------------------------------------------------------------------------------------------------------
 
   FILE *positionFile;
-  positionFile = fopen("position.data","w");
+  positionFile = fopen("position700.data","w");
   printf("\tDone!\nProduction\t");
   
 
@@ -410,13 +408,13 @@ int main()
 // is best done with all data on hand
 
   FILE *valuesFile;   // For saving various values (non-array data)
-  valuesFile = fopen("values.data","w");
+  valuesFile = fopen("values700.data","w");
   
   nAverageSteps = nProductionSteps-maxCorrelationSteps;
       // take averages over this many steps
   
   FILE *msdFile;
-  msdFile = fopen("msd.data","w");
+  msdFile = fopen("msd700.data","w");
 
   for( i = 0; i < maxCorrelationSteps; i++) {
     meanDistanceAverage[i] = 0;
@@ -439,7 +437,7 @@ int main()
   // Final processing and saving of velocity correlation
   // function and diffusion coeff from time integral
   FILE *velcorFile;
-  velcorFile = fopen("velcor.data","w");
+  velcorFile = fopen("velcor700.data","w");
 
   diffusionCoefficient = 0;
 
@@ -462,7 +460,7 @@ int main()
 
   // Calculating and saving spectrum integral thingy
   FILE *spectrumFile;
-  spectrumFile = fopen("spectrum.data","w");
+  spectrumFile = fopen("spectrum700.data","w");
 
   for( i = 0; i < nSpectrumPoints; i++) {
     spectrum[i] = 0;
@@ -494,10 +492,10 @@ int main()
 
   // Correlation data for temperature and pressure
   FILE *phiTFile;
-  phiTFile = fopen("phiTemperature.data","w");
+  phiTFile = fopen("phiTemperature700.data","w");
 
   FILE *phiPFile;
-  phiPFile = fopen("phiPressure.data","w");
+  phiPFile = fopen("phiPressure700.data","w");
   
   for(i = 0; i<maxCorrelationSteps; i++){
     phiTemperature[i] = (meanTemperature_ik[i] - meanTemperatureSquare)/ \
