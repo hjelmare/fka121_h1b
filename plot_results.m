@@ -1,7 +1,7 @@
-% in some places, data for several temperatures is required
+% in some places, data for several temperatures is required 
 % so you need to run the main program several times with
 % different temperature settings and manually rename data files
-
+%liten förändring
 clear all
 clc
 
@@ -256,6 +256,7 @@ pos1 = importdata('position500.data');
 pos2 = importdata('position700.data');
 %pos3 = importdata('position3.data');
 
+
 textStorlek = 14;
 legendStorlek = 11;
 
@@ -263,7 +264,7 @@ hold on
 plot3(pos1(:,2), pos1(:,3),pos1(:,4),'b');
 plot3(pos2(:,2), pos2(:,3),pos2(:,4),'r--');
 %plot3(pos3(:,2), pos3(:,3),pos3(:,4),'r.-');
-text = legend('T=773K', 'T=973K', 'T=1173K');
+text = legend('T=500 ^\circ C', 'T=973 ^\circ C', 'T=1173K');
 set(text, 'FontSize', legendStorlek);
 
 xlabel('[Å]', 'FontSize',textStorlek);
