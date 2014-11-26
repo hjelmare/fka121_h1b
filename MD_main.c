@@ -38,7 +38,7 @@ int main()
   int nCells = 4;
   int nParticles = 4*pow(nCells,dim);
   double wantedTemperature = 500+273;   // Target temperature
-  //wantedTemperature = 700+273;
+  wantedTemperature = 700+273;
 //  wantedTemperature = 900+273;
   double wantedTemperature2 = 900+273;
   double wantedPressure =  6.32420934* 0.0000001; // 1 atm in metal units
