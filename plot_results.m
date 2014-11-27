@@ -165,7 +165,7 @@ start = fix(length(energy)*useFrom);
 meanTemp = mean(temp(start:end))
 meanPress = mean(pressure(start:end))
 
-%% Velocity correlation function
+%% Velocity correlation function - production
 
 clear all
 clc
@@ -180,18 +180,19 @@ data_700 = importdata('velcor700.data');
 
 hold on
 plot(data_500(:,1),data_500(:,2),'b')
-plot(data_700(:,1),data_700(:,2),'g.')
+plot(data_700(:,1),data_700(:,2),'r.-')
 %plot(data_900(:,1),data_900(:,2),'r--')
 
-ylabel('Velocity correlation [(Å/ps^2)^2]','FontSize',textStorlek)
+ylabel('Velocity correlation [Å^2/ps^2]','FontSize',textStorlek)
 xlabel('\Delta t [ps]','FontSize',textStorlek)
 
-text = legend('T = 773 K', 'T = 973 K', 'T = 1173 K');
+text = legend('T=500 ^\circC', 'T=700 ^\circC');
 set(text, 'FontSize', legendStorlek);
 
 saveas(gcf,'velcor.png','png')
 
-%% Spectrum analysis
+%% Spectrum analysis - check axes!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% and probably incorrect data as well.... fuck.
 
 clear all
 clc
@@ -202,23 +203,22 @@ legendStorlek = 11;
 
 data_500 = importdata('spectrum500.data');
 data_700 = importdata('spectrum700.data');
-%data_900 = importdata('spectrum_900.data');
 
 hold on
 plot(data_500(:,1),data_500(:,2),'b')
-plot(data_700(:,1),data_700(:,2),'g.')
-%plot(data_900(:,1),data_900(:,2),'r--')
+plot(data_700(:,1),data_700(:,2),'r.-')
 
-ylabel('Spectrum of velocity correlation function [(Å/ps^2)^2]', ...
+ylabel('Spectrum of velocity correlation function [Å^2/ps]', ...
     'FontSize',textStorlek)
 xlabel('\omega [rad/ps]','FontSize',textStorlek)
 
-text = legend('T = 773 K', 'T = 973 K', 'T = 1173 K');
+text = legend('T=500 ^\circC', 'T=700 ^\circC');
 set(text, 'FontSize', legendStorlek);
+axis([0 0.5 -5 25])
 
 saveas(gcf,'spectrum.png','png')
 
-%% MSD function
+%% MSD function - production
 
 clear all
 clc
@@ -226,29 +226,31 @@ clf
 
 data = importdata('msd500.data');
 data2 = importdata('msd700.data');
-%data3 = importdata('msd500.data');
 
 textStorlek = 14;
 legendStorlek = 11;
 
+ds_line = 6*data2(:,1)*0.5485;    % to show MSD converged when averaging
+
 hold on
 plot(data(:,1),data(:,2), 'b');
-plot(data2(:,1),data2(:,2),'r--');
-%plot(data3(:,1),data3(:,2),'g.');
+plot(data2(:,1),data2(:,2),'r.-');
+plot(data2(:,1),ds_line,'k--');
 
-ylabel('MSD ', 'FontSize',textStorlek)
+ylabel('MSD [Å^2]', 'FontSize',textStorlek)
 xlabel('\Delta t [ps]', 'FontSize',textStorlek)
-text = legend('T=773K', 'T=973', 'T=1173K');
+text = legend('T=500 ^\circC', 'T=700 ^\circC', '6 D_s \Delta t');
 set(text, 'FontSize', legendStorlek);
 
 saveas(gcf,'MSD.png','png')
 
-%% Plot positions (3D-plot) of one particle
+%% Plot positions (3D-plot) of one particle - manual save - production
 clear all
 clc
+clf
+
 pos1 = importdata('position500.data');
 pos2 = importdata('position700.data');
-%pos3 = importdata('position3.data');
 
 
 textStorlek = 14;
@@ -256,9 +258,14 @@ legendStorlek = 11;
 
 hold on
 plot3(pos1(:,2), pos1(:,3),pos1(:,4),'b');
+<<<<<<< HEAD
 plot3(pos2(:,2), pos2(:,3),pos2(:,4),'r--');
 %plot3(pos3(:,2), pos3(:,3),pos3(:,4),'r.-');
 text = legend('T=500 ^\circ C', 'T=973 ^\circ C', 'T=1173K');
+=======
+plot3(pos2(:,2), pos2(:,3),pos2(:,4),'r.-');
+text = legend('T=500 ^\circC', 'T=700 ^\circC');
+>>>>>>> 4f4830c2e6ed7fb90555c7c3f8db220074d9c24f
 set(text, 'FontSize', legendStorlek);
 
 xlabel('[Å]', 'FontSize',textStorlek);
