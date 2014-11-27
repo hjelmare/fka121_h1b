@@ -1,8 +1,8 @@
-5.322285e-01	Diffusion coeff (MSD)
-1.493714e+00	Diffusion coeff (time integral)
-9.704883e+02	 Mean Temperature
-1.905267e-04	 Mean Pressure
-2.820252e+01	sTemperature
-1.024396e+02	sPressure
-1.444627e+00	varTemperature
-5.775341e-09	varPressure
+5.511324e-01	Diffusion coeff (MSD)
+4.690275e-01	Diffusion coeff (time integral)
+9.795126e+02	 Mean Temperature
+8.728129e-05	 Mean Pressure
+2.943289e+01	sTemperature
+2.079287e+02	sPressure
+1.510523e+00	varTemperature
+1.358863e-08	varPressure

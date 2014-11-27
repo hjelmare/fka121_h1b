@@ -16,17 +16,17 @@ int main()
   // REMEMBER: \m/ METAL UNITS \m/
   // simulation settings
   double equilibrationTime = 25;
-  double productionTime = 1;
-  double timestep = 0.01;
-//  timestep = 0.001;
-//  timestep = 0.0001;
+  double productionTime = 25;
+  double timestep = 0.01; // too long
+  timestep = 0.001;       // just right
+//  timestep = 0.0001;    // too short
 
   double msdAverageSteps = 50;
     
   int nSpectrumPoints = 1000;
   double spectrumInterval = PI;
   
-  double maxCorrelationTime = 0.01;
+  double maxCorrelationTime = 0.3;
   
   double timeConstantT = 1;
   double timeConstantP = 1;
@@ -450,11 +450,11 @@ int main()
     meanVelocityAverage[i] = meanVelocityAverage[i]/nParticles;
     fprintf(velcorFile, "%e\t%e\n", i*timestep, meanVelocityAverage[i]);
     
-    diffusionCoefficient += meanVelocityAverage[i];
+    diffusionCoefficient += meanVelocityAverage[i]*timestep;
   }
 
   diffusionCoefficient = (1.0/3.0) * \
-  diffusionCoefficient / maxCorrelationSteps;
+  diffusionCoefficient;
   fprintf(valuesFile,"%e\tDiffusion coeff (time integral)\n", \
   diffusionCoefficient);
 
@@ -465,10 +465,10 @@ int main()
   for( i = 0; i < nSpectrumPoints; i++) {
     spectrum[i] = 0;
     for( j = 0; j < maxCorrelationSteps; j++) {
-      spectrum[i] += meanVelocityAverage[j] * cos(spectrumInterval * \
-      i * j / nSpectrumPoints);
+      spectrum[i] += meanVelocityAverage[j] * cos(spectrumInterval * i / \
+      nSpectrumPoints * j * timestep ) * timestep;
     }
-    spectrum[i] = 2 * spectrum[i]/maxCorrelationSteps;
+    spectrum[i] = 2 * spectrum[i];
     fprintf(spectrumFile,"%e \t %e \n",i*spectrumInterval/nSpectrumPoints, \
     spectrum[i]);
   }
