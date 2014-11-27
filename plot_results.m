@@ -220,7 +220,7 @@ xlabel('\omega [rad/ps]','FontSize',textStorlek)
 
 text = legend('T=500 ^\circC', 'T=700 ^\circC');
 set(text, 'FontSize', legendStorlek);
-axis([0 0.5 -5 25])
+%axis([0 0.5 -5 25])
 
 saveas(gcf,'spectrum.png','png')
 
