@@ -512,13 +512,13 @@ int main()
   while( (phiTemperature[i] > limit) && (i < maxCorrelationSteps) ) {
     i++;
   }
-  MTemperature = i;
+  MTemperature = i;   //Kanske -1
 
   i = 0;
   while( (phiPressure[i] > limit) && (i < maxCorrelationSteps) ) {
     i++;
   }
-  MPressure = i;
+  MPressure = i;      // Kanske -1 (vi tar s=1 när k=0...)
 
   //Sum over phi to get statistical inefficiency for temperature
   for(i = 0; i<MTemperature; i++){

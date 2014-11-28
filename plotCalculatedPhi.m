@@ -2,8 +2,8 @@
 clear all
 clc
 
-phiP = importdata('phiPressure.data');
-phiT = importdata('phiTemperature.data');
+phiP = importdata('phiPressure700.data');
+phiT = importdata('phiTemperature700.data');
 
 
 plot(phiT(:,1), phiT(:,2), 'b');
